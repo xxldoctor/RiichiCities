@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from telegram import Update
@@ -7,7 +8,7 @@ from telegram.ext import Updater, CommandHandler, CallbackContext
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Ваш токен бота, полученный от @BotFather
-TOKEN = "5950642026:AAH3Gp6UTnA6ORplu8BSDivs_H8xtSb6PW0"
+TOKEN = os.environ.get("TOKEN")
 
 # Имя пользователя администратора
 ADMIN_USERNAME = "xxldoctor"
