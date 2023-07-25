@@ -259,7 +259,7 @@ def rename_city(update: Update, _: CallbackContext) -> None:
     # Получаем текст команды (без самой команды /rename_city)
     command_text = update.message.text.split(None, 1)[1].strip()
 
-    if ',' not in command_text:
+    if not command_text or ',' not in command_text:
         update.message.reply_text(
             "Вы не указали старое и новое имя города для переименования.\n"
             "Используйте запятую (,) в качестве разделителя.")
