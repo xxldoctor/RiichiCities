@@ -1,20 +1,26 @@
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
+from background import keep_alive  # импорт функции для поддержки работоспособности
 import os
 import json
 import logging
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+import pip
+pip.main(['install', 'python-telegram-bot==13.13'])
+
+keep_alive()  # запускаем flask-сервер в отдельном потоке.
 
 # Установка уровня логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Ваш токен бота, полученный от @BotFather
-TOKEN = os.environ.get("TOKEN")
+TOKEN = os.environ['bot_token']
 
 # Имя пользователя администратора
 ADMIN_USERNAME = "xxldoctor"
 
 # Глобальная переменная для хранения данных о городах и пользователях
 DATA_FILE = "city_users.json"
+
 
 # Загрузка данных из файла
 def load_data_from_file():
@@ -27,12 +33,15 @@ def load_data_from_file():
     # Преобразуем ключи в строки перед возвратом данных
     return {str(key): value for key, value in data.items()}
 
+
 city_users = load_data_from_file()
+
 
 # Сохранение данных в файл
 def save_data_to_file(data):
     with open(DATA_FILE, "w") as file:
         json.dump({str(key): value for key, value in data.items()}, file)
+
 
 # Запуск бота
 def start(update: Update, _: CallbackContext) -> None:
@@ -46,6 +55,7 @@ def start(update: Update, _: CallbackContext) -> None:
     save_data_to_file(city_users)
     help_command(update, _)
 
+
 # Справка по командам
 def help_command(update: Update, _: CallbackContext) -> None:
     help_text = (
@@ -58,6 +68,7 @@ def help_command(update: Update, _: CallbackContext) -> None:
         "/remove_from_city - Удалить себя из текущего города\n"
     )
     update.message.reply_text(help_text)
+
 
 # Функция возвращающая список городов с пользователями
 def list_cities(update: Update, _: CallbackContext) -> None:
@@ -73,6 +84,7 @@ def list_cities(update: Update, _: CallbackContext) -> None:
     cities_list = "\n".join(cities)
     update.message.reply_text(f"Список городов с пользователями в этом чате:\n{cities_list}")
 
+
 # Функция для получения пользователей по городу
 def list_users_from_city(update: Update, context: CallbackContext) -> None:
     command_parts = update.message.text.strip().split(None, 1)
@@ -87,8 +99,9 @@ def list_users_from_city(update: Update, context: CallbackContext) -> None:
     chat_id = str(update.effective_message.chat_id)
     users_ids = city_users.get(chat_id, {}).get(city, [])
 
-    if city == ('Видное'):
-        update.message.reply_text(f"Единственный пользователь из этого города - @shimmerko - занимает всё доступное место в городе {city}.")
+    if city == "Видное":
+        update.message.reply_text(f"Единственный пользователь из этого города - "
+                                  f"@shimmerko - занимает всё доступное место в городе {city}.")
         return
 
     if not users_ids:
@@ -109,7 +122,11 @@ def list_users_from_city(update: Update, context: CallbackContext) -> None:
 
     # Отправляем сообщение без звукового уведомления о городе и списка пользователей
     message_text = f"Пользователи из города {city}:\n{users_list}"
-    context.bot.send_message(chat_id=update.effective_message.chat_id, text=message_text, parse_mode='HTML', disable_notification=True)
+    context.bot.send_message(chat_id=update.effective_message.chat_id,
+                             text=message_text,
+                             parse_mode='HTML',
+                             disable_notification=True)
+
 
 # Функция для получения города по пользователю
 def get_city_by_user(update: Update, _: CallbackContext) -> None:
@@ -159,6 +176,7 @@ def get_city_by_user(update: Update, _: CallbackContext) -> None:
         else:
             update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
 
+
 # Функция для изменения города пользователем
 def change_city(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
@@ -174,7 +192,7 @@ def change_city(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Некорректное имя города. Город не может начинаться с '/'")
         return
 
-    if new_city == ('Видное'):
+    if new_city == "Видное":
         update.message.reply_text("К сожалению в этом городе слишком тесно - вы не поместитесь =(")
         return
 
@@ -197,7 +215,6 @@ def change_city(update: Update, context: CallbackContext) -> None:
 
         chat_data[new_city].append(user.id)
 
-
     # Сохраняем данные о городах и пользователях для текущего чата
     city_users[chat_id] = chat_data
     save_data_to_file(city_users)
@@ -205,8 +222,9 @@ def change_city(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(f"Ваш город изменен на: {new_city}")
     list_users_from_city(update, context)
 
+
 # Функция для удаления пользователя из города
-def remove_from_city(update: Update, context: CallbackContext) -> None:
+def remove_from_city(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
     chat_id = str(update.effective_message.chat_id)
 
@@ -229,6 +247,7 @@ def remove_from_city(update: Update, context: CallbackContext) -> None:
     city_users[chat_id] = chat_data
     save_data_to_file(city_users)
 
+
 # Функция для администратора для переименования города
 def rename_city(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
@@ -242,7 +261,8 @@ def rename_city(update: Update, _: CallbackContext) -> None:
 
     if ',' not in command_text:
         update.message.reply_text(
-            "Вы не указали старое и новое имя города для переименования. Используйте запятую (,) в качестве разделителя.")
+            "Вы не указали старое и новое имя города для переименования.\n"
+            "Используйте запятую (,) в качестве разделителя.")
         return
 
     old_city, new_city = command_text.split(',', 1)
@@ -273,6 +293,7 @@ def rename_city(update: Update, _: CallbackContext) -> None:
     city_users[chat_id] = chat_data
     save_data_to_file(city_users)
 
+
 # Отладка данных
 def debug(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
@@ -282,6 +303,7 @@ def debug(update: Update, _: CallbackContext) -> None:
         return
 
     update.message.reply_text(f"Структура city_users:\n{city_users}")
+
 
 def main() -> None:
     updater = Updater(TOKEN)
@@ -324,6 +346,7 @@ def main() -> None:
 
     # Сохранение данных в файл после остановки бота
     save_data_to_file(city_users)
+
 
 if __name__ == '__main__':
     main()
