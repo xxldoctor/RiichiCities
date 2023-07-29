@@ -314,6 +314,7 @@ def rename_city(update: Update, _: CallbackContext) -> None:
   city_users[chat_id] = chat_data
   save_data_to_file(city_users)
 
+
 # Функция для администратора для удаления пользователя
 def remove_user(update: Update, _: CallbackContext) -> None:
 
