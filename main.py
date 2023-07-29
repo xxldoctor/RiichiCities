@@ -381,15 +381,21 @@ def remove_city(update: Update, _: CallbackContext) -> None:
     update.message.reply_text("Вы не являетесь администратором.")
     return
 
-  city_to_remove = update.message.text.split(None, 1)[1].strip()
+  command_parts = update.message.text.strip().split(None, 1)
+
+  if len(command_parts) < 2:
+    update.message.reply_text("Вы не указали город для удаления.")
+    return
+
+  city = command_parts[1].strip()  # Удаляем лишние пробелы
 
   # Получим данные о городах и пользователей для текущего чата
   chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(chat_id, {})
 
-  if city_to_remove in chat_data:
-    del chat_data[city_to_remove]
-    update.message.reply_text(f"Город {city_to_remove} удален из списка городов.")
+  if city in chat_data:
+    del chat_data[city]
+    update.message.reply_text(f"Город {city} удален из списка городов.")
 
   # Сохраняем данные о городах и пользователей для текущего чата
   city_users[chat_id] = chat_data
