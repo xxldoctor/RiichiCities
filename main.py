@@ -314,7 +314,7 @@ def links(update: Update, _: CallbackContext) -> None:
         links_list = json.load(file)
 
     # Отправляем список ссылок в чат
-    update.message.reply_text("Полезные ссылки:\n" + "\n".join(links_list))
+    update.message.reply_text("Полезные ссылки:\n" + "\n".join(links_list), parse_mode='html')
 
 
 def main() -> None:
