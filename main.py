@@ -59,13 +59,14 @@ def start(update: Update, _: CallbackContext) -> None:
 # Справка по командам
 def help_command(update: Update, _: CallbackContext) -> None:
     help_text = (
-        "Список доступных команд:\n"
-        "/help - Вывести список команд\n"
-        "/cities - Вывести список городов с пользователями\n"
-        "<code>/users_from_city город</code> - Вывести список пользователей из указанного города\n"
-        "<code>/city_by_user юзернейм</code> - Получить город по упоминанию пользователя\n"
-        "<code>/my_city город</code> - Установить/изменить свой город\n"
-        "<code>/leave_city</code> - Удалить себя из текущего города\n"
+      "Список доступных команд:\n"
+      "/help - Вывести список команд\n"
+      "/cities - Вывести список городов с пользователями\n"
+      "<code>/users_from_city город</code> - Вывести список пользователей из указанного города\n"
+      "<code>/city_by_user юзернейм</code> - Получить город по упоминанию пользователя\n"
+      "<code>/my_city город</code> - Установить/изменить свой город\n"
+      "<code>/leave_city</code> - Удалить себя из текущего города\n"
+      "/links - Полезные ссылки\n"
     )
     update.message.reply_text(help_text, parse_mode='html')
 
@@ -313,8 +314,10 @@ def links(update: Update, _: CallbackContext) -> None:
     with open("links.json", "r", encoding="utf-8") as file:
         links_list = json.load(file)
 
+    links_text = "\n".join(links_list)
+
     # Отправляем список ссылок в чат
-    update.message.reply_text("Полезные ссылки:\n" + "\n".join(links_list), parse_mode='html')
+    update.message.reply_text(links_text, parse_mode='html', disable_web_page_preview=True)
 
 
 def main() -> None:
