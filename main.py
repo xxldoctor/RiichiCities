@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, ChatMember
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from background import keep_alive  # импорт функции для поддержки работоспособности
 import os
@@ -260,21 +260,33 @@ def leave_city(update: Update, _: CallbackContext) -> None:
 def rename_city(update: Update, _: CallbackContext) -> None:
   user = update.effective_user
 
-  if user.username != ADMIN_USERNAME:
-    update.message.reply_text("Вы не являетесь администратором.")
-    return
+  if not update.effective_chat.get_member(user.id).status in [ChatMember.ADMINISTRATOR, ChatMember.CREATOR] and user.username != ADMIN_USERNAME:
+        update.message.reply_text("Вы не являетесь администратором.")
+        return
 
+  if len(update.message.text.split()) < 2:
+    update.message.reply_text(
+      "Вы не указали старое и новое имя города для переименования.\n"
+      "Используйте запятую (,) в качестве разделителя."
+    )
+    return
+    
   # Получаем текст команды (без самой команды /rename_city)
   command_text = update.message.text.split(None, 1)[1].strip()
 
-  if not command_text or ',' not in command_text:
+  if ',' not in command_text:
     update.message.reply_text(
       "Вы не указали старое и новое имя города для переименования.\n"
       "Используйте запятую (,) в качестве разделителя."
     )
     return
 
-  old_city, new_city = command_text.split(',', 1)
+  arg_cities = command_text.split(',')
+  if len(arg_cities) != 2:
+    update.message.reply_text("Вы должны указать ровно два города для переименования.")
+    return
+
+  old_city, new_city = arg_cities[0].strip(), arg_cities[1].strip()
   old_city, new_city = old_city.strip(), new_city.strip()
 
   if not old_city or not new_city:
