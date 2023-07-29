@@ -307,6 +307,16 @@ def debug(update: Update, _: CallbackContext) -> None:
     update.message.reply_text(f"Структура city_users:\n{city_users}")
 
 
+# Вывод ссылок
+def links(update: Update, _: CallbackContext) -> None:
+    # Открываем файл с ссылками и читаем их в список
+    with open("links.json", "r", encoding="utf-8") as file:
+        links_list = json.load(file)
+
+    # Отправляем список ссылок в чат
+    update.message.reply_text("Полезные ссылки:\n" + "\n".join(links_list))
+
+
 def main() -> None:
     updater = Updater(TOKEN)
 
@@ -339,6 +349,9 @@ def main() -> None:
 
     # Регистрация обработчика для команды /debug
     dispatcher.add_handler(CommandHandler("debug", debug))
+
+    # Регистрация обработчика для команды /links
+    dispatcher.add_handler(CommandHandler("links", links))
 
     # Запуск бота
     updater.start_polling()
