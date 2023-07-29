@@ -234,23 +234,19 @@ def my_city(update: Update, context: CallbackContext) -> None:
 # Функция для удаления пользователя из города
 def leave_city(update: Update, _: CallbackContext) -> None:
   user = update.effective_user
-  chat_id = str(update.effective_message.chat_id)
 
   # Получим данные о городах и пользователей для текущего чата
+  chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(chat_id, {})
+
   removed_city = next((city for city, users in chat_data.items() if user.id in users), None)
 
   if not removed_city:
     update.message.reply_text("Вы не числитесь в каком-либо городе.")
     return
 
-  # chat_data[removed_city].remove(user.id)
   remove_user_from_city(chat_id, removed_city, user.id)
   update.message.reply_text(f"Вы удалены из города {removed_city}.")
-
-  # # Если город стал пустым после удаления пользователя, удаляем его из списка городов
-  # if not chat_data[removed_city]:
-  #   del chat_data[removed_city]
 
   # Сохраняем данные о городах и пользователях для текущего чата
   city_users[chat_id] = chat_data
@@ -365,8 +361,10 @@ def remove_user(update: Update, _: CallbackContext) -> None:
         user_id).user.username else f"ID:{user_id}" for user_id in users]), None)
 
     if city:
+      update.message.reply_text(f"{chat_data[city]}")
       remove_user_from_city(chat_id, city, user_id)
       update.message.reply_text(f"Пользователь {user_id} удален из города {city}")
+      update.message.reply_text(f"{chat_data[city]}")
     else:
       update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
 
@@ -402,9 +400,23 @@ def remove_city(update: Update, _: CallbackContext) -> None:
   city_users[chat_id] = chat_data
   save_data_to_file(city_users)
 
-
 # Отладка данных
 def debug(update: Update, _: CallbackContext) -> None:
+  user = update.effective_user
+
+  if user.username != ADMIN_USERNAME:
+    update.message.reply_text("Вы не являетесь администратором.")
+    return
+
+  # Получим данные о городах и пользователей для текущего чата
+  chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(chat_id, {})
+
+  update.message.reply_text(f"Структура city_users:\n{chat_data}")
+
+
+# Отладка данных
+def debug_all(update: Update, _: CallbackContext) -> None:
   user = update.effective_user
 
   if user.username != ADMIN_USERNAME:
@@ -479,6 +491,7 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("remove_user", remove_user))
   dispatcher.add_handler(CommandHandler("remove_city", remove_city))
   dispatcher.add_handler(CommandHandler("debug", debug))
+  dispatcher.add_handler(CommandHandler("debug_all", debug_all))
   dispatcher.add_handler(CommandHandler("links", links))
 
   # Запуск бота
