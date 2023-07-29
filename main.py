@@ -244,12 +244,13 @@ def leave_city(update: Update, _: CallbackContext) -> None:
     update.message.reply_text("Вы не числитесь в каком-либо городе.")
     return
 
-  chat_data[removed_city].remove(user.id)
+  # chat_data[removed_city].remove(user.id)
+  remove_user_from_city(chat_id, removed_city, user.id)
   update.message.reply_text(f"Вы удалены из города {removed_city}.")
 
-  # Если город стал пустым после удаления пользователя, удаляем его из списка городов
-  if not chat_data[removed_city]:
-    del chat_data[removed_city]
+  # # Если город стал пустым после удаления пользователя, удаляем его из списка городов
+  # if not chat_data[removed_city]:
+  #   del chat_data[removed_city]
 
   # Сохраняем данные о городах и пользователях для текущего чата
   city_users[chat_id] = chat_data
@@ -258,11 +259,10 @@ def leave_city(update: Update, _: CallbackContext) -> None:
 
 # Функция для администратора для переименования города
 def rename_city(update: Update, _: CallbackContext) -> None:
-  user = update.effective_user
 
-  if not update.effective_chat.get_member(user.id).status in [ChatMember.ADMINISTRATOR, ChatMember.CREATOR] and user.username != ADMIN_USERNAME:
-        update.message.reply_text("Вы не являетесь администратором.")
-        return
+  if not is_admin(update):
+    update.message.reply_text("Вы не являетесь администратором.")
+    return
 
   if len(update.message.text.split()) < 2:
     update.message.reply_text(
@@ -314,6 +314,87 @@ def rename_city(update: Update, _: CallbackContext) -> None:
   city_users[chat_id] = chat_data
   save_data_to_file(city_users)
 
+# Функция для администратора для удаления пользователя
+def remove_user(update: Update, _: CallbackContext) -> None:
+
+  if not is_admin(update):
+    update.message.reply_text("Вы не являетесь администратором.")
+    return
+
+  command_parts = update.message.text.strip().split(None, 1)
+
+  if len(command_parts) < 2:
+    update.message.reply_text("Вы не указали пользователя для удаления.")
+    return
+
+  # Извлекаем упоминания пользователей из текста сообщения
+  mentions = update.message.entities
+  user_ids = {}
+
+  for mention in mentions:
+    if mention.type == "mention":
+      user_mention = update.message.text[mention.offset + 1: mention.offset + mention.length].lower()
+      user_ids[user_mention] = user_mention
+    elif mention.type == "text_mention":
+      user_mention = update.message.text[mention.offset: mention.offset + mention.length]
+      user_id = mention.user.id
+      user_ids[user_mention] = f"ID:{user_id}"
+
+  # Если указано только одно слово (не упоминание пользователя), используем его как user_mention
+  if len(command_parts) == 2 and not any(mention.type in ["mention", "text_mention"] for mention in mentions):
+    if len(command_parts[1].split()) == 1:
+      user_mention = command_parts[1].strip().lower()
+      user_ids[user_mention] = user_mention
+    else:
+      update.message.reply_text(
+        "Вы неправильно используете команду.\n"
+        "Укажите один юзернейм или используйте текст с упоминаниями пользователей (можно нескольких).\n"
+        "Для пользователей без юзернеймов поддерживается упоминание по ссылке."
+      )
+      return
+
+  # Получим данные о городах и пользователей для текущего чата
+  chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(chat_id, {})
+
+  for user_id in user_ids:
+    # Найдем город, если пользователь с таким username или id существует в текущем чате
+    city = next((city for city, users in chat_data.items() if user_ids[user_id] in [
+      update.effective_message.chat.get_member(user_id).user.username if update.effective_message.chat.get_member(
+        user_id).user.username else f"ID:{user_id}" for user_id in users]), None)
+
+    if city:
+      remove_user_from_city(chat_id, city, user_id)
+      update.message.reply_text(f"Пользователь {user_id} удален из города {city}")
+    else:
+      update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
+
+  # Сохраняем данные о городах и пользователях для текущего чата
+  city_users[chat_id] = chat_data
+  save_data_to_file(city_users)
+
+
+# Функция для администратора для удаления города
+def remove_city(update: Update, _: CallbackContext) -> None:
+
+  if not is_admin(update):
+    update.message.reply_text("Вы не являетесь администратором.")
+    return
+
+  city_to_remove = update.message.text.split(None, 1)[1].strip()
+
+  # Получим данные о городах и пользователей для текущего чата
+  chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(chat_id, {})
+
+  if city_to_remove in chat_data:
+    del chat_data[city_to_remove]
+    update.message.reply_text(f"Город {city_to_remove} удален из списка городов.")
+
+  # Сохраняем данные о городах и пользователей для текущего чата
+  city_users[chat_id] = chat_data
+  save_data_to_file(city_users)
+
 
 # Отладка данных
 def debug(update: Update, _: CallbackContext) -> None:
@@ -338,40 +419,59 @@ def links(update: Update, _: CallbackContext) -> None:
   update.message.reply_text(links_text, parse_mode='html', disable_web_page_preview=True)
 
 
+# Проверка админправ
+def is_admin(update):
+  user = update.effective_user
+  return (update.effective_chat.get_member(user.id).status in [ChatMember.ADMINISTRATOR, ChatMember.CREATOR]
+          or user.username == ADMIN_USERNAME)
+
+
+# Удаление пользователя из города
+def remove_user_from_city(chat_id, city, user_id):
+  # Получим данные о городах и пользователях для указанного chat_id
+  chat_data = city_users.get(str(chat_id), {})
+
+  # Проверим, есть ли указанный город в данных
+  if city not in chat_data:
+    return False  # Город не найден, выходим с ошибкой
+
+  # Получим список пользователей для указанного города
+  users_ids = chat_data[city]
+
+  # Проверим, есть ли указанный пользователь в списке пользователей города
+  if user_id not in users_ids:
+    return False  # Пользователь не найден в указанном городе, выходим с ошибкой
+
+  # Удаляем пользователя из списка пользователей города
+  users_ids.remove(user_id)
+
+  # Если город стал пустым после удаления пользователя, удаляем его из списка городов
+  if not chat_data[city]:
+    del chat_data[city]
+
+  # Сохраняем обновленные данные о городах и пользователях
+  city_users[str(chat_id)] = chat_data
+  save_data_to_file(city_users)
+
+  return True  # Успешно удалили пользователя из города
+
+
 def main() -> None:
   updater = Updater(TOKEN)
 
   # Получение диспетчера для регистрации обработчиков
   dispatcher = updater.dispatcher
-
-  # Регистрация обработчика для команды /start
   dispatcher.add_handler(CommandHandler("start", start))
-
-  # Регистрация обработчика для команды /help
   dispatcher.add_handler(CommandHandler("help", help_command))
-
-  # Регистрация обработчика для команды /cities
   dispatcher.add_handler(CommandHandler("cities", cities))
-
-  # Регистрация обработчика для команды /users_from_city
   dispatcher.add_handler(CommandHandler("users_from_city", users_from_city))
-
-  # Регистрация обработчика для команды /city_by_user
   dispatcher.add_handler(CommandHandler("city_by_user", city_by_user))
-
-  # Регистрация обработчика для команды /my_city
   dispatcher.add_handler(CommandHandler("my_city", my_city))
-
-  # Регистрация обработчика для команды /leave_city
   dispatcher.add_handler(CommandHandler("leave_city", leave_city))
-
-  # Регистрация обработчика для команды /rename_city
   dispatcher.add_handler(CommandHandler("rename_city", rename_city))
-
-  # Регистрация обработчика для команды /debug
+  dispatcher.add_handler(CommandHandler("remove_user", remove_user))
+  dispatcher.add_handler(CommandHandler("remove_city", remove_city))
   dispatcher.add_handler(CommandHandler("debug", debug))
-
-  # Регистрация обработчика для команды /links
   dispatcher.add_handler(CommandHandler("links", links))
 
   # Запуск бота
