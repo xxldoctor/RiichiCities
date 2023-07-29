@@ -61,32 +61,32 @@ def help_command(update: Update, _: CallbackContext) -> None:
     help_text = (
         "Список доступных команд:\n"
         "/help - Вывести список команд\n"
-        "/list_cities - Вывести список городов с пользователями\n"
-        "/list_users_from_city <город> - Вывести список пользователей из указанного города\n"
-        "/get_city_by_user <имя_пользователя> - Получить город по пользователю\n"
-        "/change_city <город> - Изменить свой город\n"
-        "/remove_from_city - Удалить себя из текущего города\n"
+        "/cities - Вывести список городов с пользователями\n"
+        "<code>/users_from_city город</code> - Вывести список пользователей из указанного города\n"
+        "<code>/city_by_user юзернейм</code> - Получить город по упоминанию пользователя\n"
+        "<code>/my_city город</code> - Установить/изменить свой город\n"
+        "<code>/leave_city</code> - Удалить себя из текущего города\n"
     )
-    update.message.reply_text(help_text)
+    update.message.reply_text(help_text, parse_mode='html')
 
 
 # Функция возвращающая список городов с пользователями
-def list_cities(update: Update, _: CallbackContext) -> None:
+def cities(update: Update, _: CallbackContext) -> None:
 
     # Получаем список городов для текущего чата
     chat_id = str(update.effective_message.chat_id)
-    cities = city_users.get(chat_id, {}).keys()
+    users_cities = city_users.get(chat_id, {}).keys()
 
     if not cities:
         update.message.reply_text("В этом чате нет данных о городах и пользователях.")
         return
 
-    cities_list = "\n".join(cities)
+    cities_list = "\n".join(users_cities)
     update.message.reply_text(f"Список городов с пользователями в этом чате:\n{cities_list}")
 
 
 # Функция для получения пользователей по городу
-def list_users_from_city(update: Update, context: CallbackContext) -> None:
+def users_from_city(update: Update, context: CallbackContext) -> None:
     command_parts = update.message.text.strip().split(None, 1)
 
     if len(command_parts) < 2:
@@ -97,11 +97,12 @@ def list_users_from_city(update: Update, context: CallbackContext) -> None:
 
     # Получаем список пользователей для указанного города в текущем чате
     chat_id = str(update.effective_message.chat_id)
-    users_ids = city_users.get(chat_id, {}).get(city, [])
+    chat_data = city_users.get(chat_id, {})
+    users_ids = chat_data.get(city, [])
 
     if city == "Видное":
-        update.message.reply_text(f"Единственный пользователь из этого города - "
-                                  f"@shimmerko - занимает всё доступное место в городе {city}.")
+        update.message.reply_text("Единственный пользователь из этого города - "
+                                  "@shimmerko - занимает всё доступное место в городе.")
         return
 
     if not users_ids:
@@ -115,7 +116,8 @@ def list_users_from_city(update: Update, context: CallbackContext) -> None:
         if user.username:
             mention_list.append(f"@{user.username}")
         else:
-            mention_list.append(f"<a href=\"tg://user?id={user.id}\">{user.first_name} {user.last_name}</a>")
+            name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
+            mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a>")
 
     # Формируем строку с упоминаниями пользователей
     users_list = "\n".join(mention_list)
@@ -129,7 +131,7 @@ def list_users_from_city(update: Update, context: CallbackContext) -> None:
 
 
 # Функция для получения города по пользователю
-def get_city_by_user(update: Update, _: CallbackContext) -> None:
+def city_by_user(update: Update, _: CallbackContext) -> None:
     command_parts = update.message.text.strip().split(None, 1)
 
     if len(command_parts) < 2:
@@ -178,7 +180,7 @@ def get_city_by_user(update: Update, _: CallbackContext) -> None:
 
 
 # Функция для изменения города пользователем
-def change_city(update: Update, context: CallbackContext) -> None:
+def my_city(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     command_parts = update.message.text.strip().split(None, 1)
 
@@ -220,11 +222,11 @@ def change_city(update: Update, context: CallbackContext) -> None:
     save_data_to_file(city_users)
 
     update.message.reply_text(f"Ваш город изменен на: {new_city}")
-    list_users_from_city(update, context)
+    users_from_city(update, context)
 
 
 # Функция для удаления пользователя из города
-def remove_from_city(update: Update, _: CallbackContext) -> None:
+def leave_city(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
     chat_id = str(update.effective_message.chat_id)
 
@@ -317,20 +319,20 @@ def main() -> None:
     # Регистрация обработчика для команды /help
     dispatcher.add_handler(CommandHandler("help", help_command))
 
-    # Регистрация обработчика для команды /list_cities
-    dispatcher.add_handler(CommandHandler("list_cities", list_cities))
+    # Регистрация обработчика для команды /cities
+    dispatcher.add_handler(CommandHandler("cities", cities))
 
-    # Регистрация обработчика для команды /list_users_from_city
-    dispatcher.add_handler(CommandHandler("list_users_from_city", list_users_from_city))
+    # Регистрация обработчика для команды /users_from_city
+    dispatcher.add_handler(CommandHandler("users_from_city", users_from_city))
 
-    # Регистрация обработчика для команды /get_city_by_user
-    dispatcher.add_handler(CommandHandler("get_city_by_user", get_city_by_user))
+    # Регистрация обработчика для команды /city_by_user
+    dispatcher.add_handler(CommandHandler("city_by_user", city_by_user))
 
-    # Регистрация обработчика для команды /change_city
-    dispatcher.add_handler(CommandHandler("change_city", change_city))
+    # Регистрация обработчика для команды /my_city
+    dispatcher.add_handler(CommandHandler("my_city", my_city))
 
-    # Регистрация обработчика для команды /remove_from_city
-    dispatcher.add_handler(CommandHandler("remove_from_city", remove_from_city))
+    # Регистрация обработчика для команды /leave_city
+    dispatcher.add_handler(CommandHandler("leave_city", leave_city))
 
     # Регистрация обработчика для команды /rename_city
     dispatcher.add_handler(CommandHandler("rename_city", rename_city))
