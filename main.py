@@ -116,10 +116,10 @@ def users_from_city(update: Update, context: CallbackContext) -> None:
   users = [update.effective_chat.get_member(user_id).user for user_id in users_ids]
   mention_list = []
   for user in users:
+    name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
     if user.username:
-      mention_list.append(f"@{user.username}")
+      mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a> (@{user.username})")
     else:
-      name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
       mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a>")
 
   # Формируем строку с упоминаниями пользователей
@@ -245,8 +245,7 @@ def leave_city(update: Update, _: CallbackContext) -> None:
     update.message.reply_text("Вы не числитесь в каком-либо городе.")
     return
 
-  update.message.reply_text(f"{chat_id, city, user.id}")
-  remove_user_from_city(update, chat_id, city, user.id)
+  remove_user_from_city(chat_id, city, user.id)
   update.message.reply_text(f"Вы удалены из города {city}.")
 
   # Сохраняем данные о городах и пользователях для текущего чата
@@ -360,9 +359,18 @@ def remove_user(update: Update, _: CallbackContext) -> None:
       update.effective_message.chat.get_member(user_id).user.username
       if update.effective_message.chat.get_member(user_id).user.username
       else f"ID:{user_id}" for user_id in users]), None)
-  
-    if city:
-      remove_user_from_city(update, chat_id, city, user_ids[user_id])
+
+    if city:  
+      if user_ids[user_id].startswith("ID:"):
+        remove_id = int(user_ids[user_id][3:])
+      else:
+        remove_id = None
+      for id_temp in chat_data[city]:
+        user = update.effective_message.chat.get_member(id_temp).user
+        if user.username == user_ids[user_id]:
+          remove_id = id_temp
+          break
+      remove_user_from_city(chat_id, city, remove_id)
       update.message.reply_text(f"Пользователь {user_id} удален из города {city}")
     else:
       update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
@@ -445,7 +453,7 @@ def is_admin(update):
 
 
 # Удаление пользователя из города
-def remove_user_from_city(update, chat_id, city, user_id_or_username):
+def remove_user_from_city(chat_id, city, user_id):
   # Получим данные о городах и пользователях для указанного chat_id
   chat_data = city_users.get(str(chat_id), {})
 
@@ -455,17 +463,6 @@ def remove_user_from_city(update, chat_id, city, user_id_or_username):
 
   # Получим список пользователей для указанного города
   users_ids = chat_data[city]
-
-  # Найдем айди пользователя по юзернейму, если передан юзернейм
-  if user_id_or_username.startswith("ID:"):
-    user_id = int(user_id_or_username[3:])
-  else:
-    user_id = None
-    for user_id_temp in users_ids:
-      user = update.effective_message.chat.get_member(user_id_temp).user
-      if user.username == user_id_or_username:
-        user_id = user_id_temp
-        break
 
   # Проверим, есть ли указанный пользователь в списке пользователей города
   if user_id not in users_ids:
