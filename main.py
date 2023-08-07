@@ -21,6 +21,9 @@ ADMIN_USERNAME = "xxldoctor"
 # Глобальная переменная для хранения данных о городах и пользователях
 DATA_FILE = "city_users.json"
 
+# Список допустимых chat_id, где бот может быть использован
+ALLOWED_CHATS = {"-1001078882316": "-1001078882316", "-840250661": "test", "-938606890": "test"}
+
 
 # Загрузка данных из файла
 def load_data_from_file():
@@ -43,8 +46,21 @@ def save_data_to_file(data):
     json.dump({str(key): value for key, value in data.items()}, file)
 
 
+# Декоратор для проверки chat_id
+def check_chat_id(func):
+    def wrapper(update, context):
+        chat_id = update.effective_chat.id
+        if chat_id not in ALLOWED_CHATS:
+            update.message.reply_text("Извините, но этот бот можно использовать только в определенных чатах.")
+            return
+        # Возвращаем данные, которые могут быть использованы в функции команды
+        return func(update, context, meta_id=ALLOWED_CHATS[chat_id])
+    return wrapper
+
+
 # Запуск бота
-def start(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def start(update: Update, _: CallbackContext, meta_id) -> None:
 
   # Создаем словарь пользователей для нового чата, если его еще нет
   chat_id = str(update.effective_message.chat_id)
@@ -53,11 +69,12 @@ def start(update: Update, _: CallbackContext) -> None:
 
   update.message.reply_text("Привет! Я бот, который поможет хранить данные о городах и пользователях в чате.")
   save_data_to_file(city_users)
-  help_command(update, _)
+  help(update, _)
 
 
 # Справка по командам
-def help_command(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def help(update: Update, _: CallbackContext, meta_id) -> None:
   help_text = (
     "Список доступных команд:\n"
     "/help - Вывести список команд\n"
@@ -72,11 +89,12 @@ def help_command(update: Update, _: CallbackContext) -> None:
 
 
 # Функция возвращающая список городов с пользователями
-def cities(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def cities(update: Update, _: CallbackContext, meta_id) -> None:
 
   # Получаем список городов для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  users_cities = city_users.get(chat_id, {}).keys()
+  # chat_id = str(update.effective_message.chat_id)
+  users_cities = city_users.get(meta_id, {}).keys()
 
   if not cities:
     update.message.reply_text("В этом чате нет данных о городах и пользователях.")
@@ -87,7 +105,8 @@ def cities(update: Update, _: CallbackContext) -> None:
 
 
 # Функция для получения пользователей по городу
-def users_from_city(update: Update, context: CallbackContext) -> None:
+@check_chat_id
+def users_from_city(update: Update, context: CallbackContext, meta_id) -> None:
   command_parts = update.message.text.strip().split(None, 1)
 
   if len(command_parts) < 2:
@@ -97,8 +116,8 @@ def users_from_city(update: Update, context: CallbackContext) -> None:
   city = command_parts[1].strip()  # Удаляем лишние пробелы
 
   # Получаем список пользователей для указанного города в текущем чате
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
   users_ids = chat_data.get(city, [])
 
   if city == "Видное":
@@ -136,7 +155,8 @@ def users_from_city(update: Update, context: CallbackContext) -> None:
 
 
 # Функция для получения города по пользователю
-def city_by_user(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def city_by_user(update: Update, _: CallbackContext, meta_id) -> None:
   command_parts = update.message.text.strip().split(None, 1)
 
   if len(command_parts) < 2:
@@ -169,8 +189,8 @@ def city_by_user(update: Update, _: CallbackContext) -> None:
       return
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   for user_id in user_ids:
     # Найдем город, если пользователь с таким username или id существует в текущем чате
@@ -186,7 +206,8 @@ def city_by_user(update: Update, _: CallbackContext) -> None:
 
 
 # Функция для изменения города пользователем
-def my_city(update: Update, context: CallbackContext) -> None:
+@check_chat_id
+def my_city(update: Update, context: CallbackContext, meta_id) -> None:
   user = update.effective_user
   command_parts = update.message.text.strip().split(None, 1)
 
@@ -205,8 +226,8 @@ def my_city(update: Update, context: CallbackContext) -> None:
     return
 
   # Получим данные о городах и пользователях для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   if not chat_data:
     chat_data = {new_city: [user.id]}
@@ -224,7 +245,7 @@ def my_city(update: Update, context: CallbackContext) -> None:
     chat_data[new_city].append(user.id)
 
   # Сохраняем данные о городах и пользователях для текущего чата
-  city_users[chat_id] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
   update.message.reply_text(f"Ваш город изменен на: {new_city}")
@@ -232,12 +253,13 @@ def my_city(update: Update, context: CallbackContext) -> None:
 
 
 # Функция для удаления пользователя из города
-def leave_city(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def leave_city(update: Update, _: CallbackContext, meta_id) -> None:
   user = update.effective_user
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   city = next((city for city, users in chat_data.items() if user.id in users), None)
 
@@ -245,16 +267,17 @@ def leave_city(update: Update, _: CallbackContext) -> None:
     update.message.reply_text("Вы не числитесь в каком-либо городе.")
     return
 
-  remove_user_from_city(chat_id, city, user.id)
+  remove_user_from_city(meta_id, city, user.id)
   update.message.reply_text(f"Вы удалены из города {city}.")
 
   # Сохраняем данные о городах и пользователях для текущего чата
-  city_users[chat_id] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
 
 # Функция для администратора для переименования города
-def rename_city(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def rename_city(update: Update, _: CallbackContext, meta_id) -> None:
 
   if not is_admin(update):
     update.message.reply_text("Вы не являетесь администратором.")
@@ -294,8 +317,8 @@ def rename_city(update: Update, _: CallbackContext) -> None:
     return
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   if old_city not in chat_data:
     update.message.reply_text(f"Город '{old_city}' не найден в списке городов.")
@@ -307,12 +330,13 @@ def rename_city(update: Update, _: CallbackContext) -> None:
   update.message.reply_text(f"Город '{old_city}' переименован в '{new_city}'.")
 
   # Сохраняем данные о городах и пользователях для текущего чата
-  city_users[chat_id] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
 
 # Функция для администратора для удаления пользователя
-def remove_user(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def remove_user(update: Update, _: CallbackContext, meta_id) -> None:
 
   if not is_admin(update):
     update.message.reply_text("Вы не являетесь администратором.")
@@ -350,8 +374,8 @@ def remove_user(update: Update, _: CallbackContext) -> None:
       return
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   for user_id in user_ids:
     # Найдем город, если пользователь с таким username или id существует в текущем чате
@@ -370,18 +394,19 @@ def remove_user(update: Update, _: CallbackContext) -> None:
         if user.username == user_ids[user_id]:
           remove_id = id_temp
           break
-      remove_user_from_city(chat_id, city, remove_id)
+      remove_user_from_city(meta_id, city, remove_id)
       update.message.reply_text(f"Пользователь {user_id} удален из города {city}")
     else:
       update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
 
   # Сохраняем данные о городах и пользователях для текущего чата
-  city_users[chat_id] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
 
 # Функция для администратора для удаления города
-def remove_city(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def remove_city(update: Update, _: CallbackContext, meta_id) -> None:
 
   if not is_admin(update):
     update.message.reply_text("Вы не являетесь администратором.")
@@ -396,19 +421,20 @@ def remove_city(update: Update, _: CallbackContext) -> None:
   city = command_parts[1].strip()  # Удаляем лишние пробелы
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   if city in chat_data:
     del chat_data[city]
     update.message.reply_text(f"Город {city} удален из списка городов.")
 
   # Сохраняем данные о городах и пользователей для текущего чата
-  city_users[chat_id] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
 # Отладка данных
-def debug(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def debug(update: Update, _: CallbackContext, meta_id) -> None:
   user = update.effective_user
 
   if user.username != ADMIN_USERNAME:
@@ -416,8 +442,8 @@ def debug(update: Update, _: CallbackContext) -> None:
     return
 
   # Получим данные о городах и пользователей для текущего чата
-  chat_id = str(update.effective_message.chat_id)
-  chat_data = city_users.get(chat_id, {})
+  # chat_id = str(update.effective_message.chat_id)
+  chat_data = city_users.get(meta_id, {})
 
   update.message.reply_text(f"Структура city_users:\n{chat_data}")
 
@@ -434,7 +460,8 @@ def debug_all(update: Update, _: CallbackContext) -> None:
 
 
 # Вывод ссылок
-def links(update: Update, _: CallbackContext) -> None:
+@check_chat_id
+def links(update: Update, _: CallbackContext, meta_id) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("links.json", "r", encoding="utf-8") as file:
     links_list = json.load(file)
@@ -453,9 +480,9 @@ def is_admin(update):
 
 
 # Удаление пользователя из города
-def remove_user_from_city(chat_id, city, user_id):
+def remove_user_from_city(meta_id, city, user_id):
   # Получим данные о городах и пользователях для указанного chat_id
-  chat_data = city_users.get(str(chat_id), {})
+  chat_data = city_users.get(meta_id, {})
 
   # Проверим, есть ли указанный город в данных
   if city not in chat_data:
@@ -476,7 +503,7 @@ def remove_user_from_city(chat_id, city, user_id):
     del chat_data[city]
 
   # Сохраняем обновленные данные о городах и пользователях
-  city_users[str(chat_id)] = chat_data
+  city_users[meta_id] = chat_data
   save_data_to_file(city_users)
 
   return True  # Успешно удалили пользователя из города
@@ -488,7 +515,7 @@ def main() -> None:
   # Получение диспетчера для регистрации обработчиков
   dispatcher = updater.dispatcher
   dispatcher.add_handler(CommandHandler("start", start))
-  dispatcher.add_handler(CommandHandler("help", help_command))
+  dispatcher.add_handler(CommandHandler("help", help))
   dispatcher.add_handler(CommandHandler("cities", cities))
   dispatcher.add_handler(CommandHandler("users_from_city", users_from_city))
   dispatcher.add_handler(CommandHandler("city_by_user", city_by_user))
