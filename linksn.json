@@ -1,0 +1,90 @@
+{
+  "sections": [
+    {
+      "title": "Поиграть с друзьями:",
+      "links": [
+        "<a href=\"https://tenhou.net/3/?L7994\">Лобби 7994/3</a> (в вебклиенте/мобильном приложении)",
+        "<a href=\"http://tesuji-club.ru/riichi-online/guide-tenhou-web\">Гайд по вебклиенту</a>",
+        "<a href=\"https://tenhou.net/4/?L7994\">Лобби 7994/4</a> (в 4K клиенте)",
+        "<a href=\"http://tesuji-club.ru/riichi-online/gajd-po-igre-na-yaponskom-riichi-servere-tenhou-net\">Гайд по флешклиенту (примерно подходит для понимания 4K клиента)</a>",
+        "<a href=\"https://vk.com/@seihoku-mahjong-apps\">Список приложений</a>"
+      ]
+    },
+    {
+      "title": "Поразвиваться:",
+      "links": [
+        "<a href=\"http://tesuji-club.ru/stati-i-perevodi\">Статьи и переводы книг</a>",
+        "<a href=\"https://riichi-mitya.blogspot.ru\">Блог о риичи-маджонге в цифрах</a>",
+        "<a href=\"https://t.me/newteachingcommunity\">Тичинг</a> - конференция для развития в маджонге (подходит для игроков среднего и высокого уровня)",
+        "<a href=\"https://t.me/ittakunanikiru\">IttakuNanikiru</a> - сборник профессиональных задач с ответами и комментариями",
+        "<a href=\"https://t.me/kucmahjong\">KucMahjong</a> - переводы рандомных постов о маджонге",
+        "<a href=\"https://t.me/mushroom_mahjong\">Mushroom</a> (школа риичи-маджонга в Москве)",
+        "<a href=\"https://t.me/riichi_en_ru_books\">Риичи-библиотека</a> (канал с переводами книг по маджонгу)"
+      ]
+    },
+    {
+      "title": "Инструменты:",
+      "links": [
+        "<a href=\"https://nodocchi.moe/tenhoulog\">Статистика по играм на тенхе</a>",
+        "<a href=\"https://amae-koromo.sapk.ch\">Статистика по играм на маджсоуле</a>",
+        "<a href=\"https://tempai.net/ru/eff\">Калькулятор эффективного сбора</a>",
+        "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Тренажёр эффективного сбора</a>",
+        "<a href=\"https://kobalab.net/majiang/dapai.html\">Калькулятор Kobalab</a> (учитывает стоимость)",
+        "<a href=\"https://pystyle.info/apps/mahjong-nanikiru-simulator\">Калькулятор Pystyle</a> (учитывает стоимость)",
+        "<a href=\"https://kobalab.net/majiang\">Риичи с ботами Kobalab</a>",
+        "<a href=\"https://sagisawa.0am.jp/akochandaaaaa\">Тренировка сбора руки Pystyle</a>",
+        "<a href=\"https://mjai.ekyu.moe/ru.html\">Разбор игр нейросетью Mortal</a> (а также возможность сыграть против ботов этой нейросети)",
+        "<a href=\"https://naga.dmv.nico/naga_report/top\">Разбор игр нейросетью Naga</a> (для оплаты нужна карта иностранного банка, но можно попросить сделать разбор в тичинге)",
+        "<a href=\"https://t.me/nagariichi/4\">Пояснения к интерфейсу Наги</a>",
+        "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer Bot</a> (бот для тренировки сбора руки)",
+        "<a href=\"https://t.me/TempaiBot\">Ракаги Шигеров</a> (бот для тренировки ожиданий)"
+      ]
+    },
+    {
+      "title": "Сообщество:",
+      "links": [
+        "<a href=\"https://mahjong.click/ru\">Портал</a> (рейтинг игроков, клубы, турниры, онлайн-аккаунты)",
+        "<a href=\"https://rating.riichimahjong.org\">Пантеон</a> (система рейтингов российских клубов и турниров)",
+        "<a href=\"https://t.me/pantheon_support\">Чат поддержки Портала и Пантеона</a>",
+        "<a href=\"https://t.me/tenhou\">7994</a> - конференция для общения о маджонге (также подходит для новичковых вопросов)",
+        "<a href=\"https://t.me/riichi_tournament\">Конференция онлайн турниров</a>",
+        "<a href=\"https://t.me/riichi_mahjong\">Новости риичи-маджонга в России</a>"
+      ]
+    },
+    {
+      "title": "Поразвлекаться:",
+      "links": [
+        "<a href=\"https://docs.google.com/spreadsheets/d/1ibWdVnyVP0PXda7jC5JUpm7m3AQnlzcvwqMpn2PiykA\">Список фильмов, аниме и манги о маджонге</a>",
+        "<a href=\"https://docs.google.com/spreadsheets/d/1J5Ocskeric_KIQd33yMI-mf-Gv2X5YuGSQ7WxUjmuEo\">Список аниме с упоминаниями маджонга</a>",
+        "<a href=\"https://t.me/densetsunakatala\">Аудиопасты про легендарного каталу</a>",
+        "<a href=\"https://t.me/riichimahjongset\">Канал про наборы</a>",
+        "<a href=\"https://t.me/mahjong_fucking_casino\">Записки про походы в дзянсо</a>",
+        "<a href=\"https://t.me/temakichi\">Творчество Temakichi</a>",
+        "<a href=\"https://t.me/newmleaguecommunity\">Обсуждение М-лиги</a>"
+      ]
+    },
+    {
+      "title": "Стримы:",
+      "links": [
+        "<a href=\"https://www.twitch.tv/shimm3rko\">Виктор Гришин</a>",
+        "<a href=\"https://www.youtube.com/@andreimaximov7063\">Андрей Максимов</a>",
+        "<a href=\"https://www.twitch.tv/gererbo\">Сергей Алёшин</a> (<a href=\"https://t.me/mahjong_capi\">канал</a>)",
+        "<a href=\"https://www.twitch.tv/enzegeitor\">Александр Гончаренко</a> (<a href=\"https://t.me/riichi_one_outs\">канал</a>)",
+        "<a href=\"https://www.twitch.tv/ilmarinnen\">Павел Патрикеев</a>",
+        "<a href=\"https://www.twitch.tv/yuukoichi\">Любовь Мишакова</a>",
+        "<a href=\"https://www.twitch.tv/vitalpicnic\">Виталий Борзоногов</a>",
+        "<a href=\"https://www.twitch.tv/dalex026\">Алексей Дергунов</a>",
+        "<a href=\"https://www.twitch.tv/zekses\">Николай Марченко</a>",
+        "<a href=\"https://www.twitch.tv/opkos\">Константин Опарин</a>"
+      ]
+    },
+    {
+      "title": "Где поиграть (клубы, школы)",
+      "links": [
+        "<a href=\"https://vk.com/riichi_msk\">Агари</a> (Москва, клуб)",
+        "<a href=\"https://t.me/mushroom_mahjong\">Mushroom</a> (Москва, школа)",
+        "<a href=\"https://vk.com/seihoku\">Сейхоку</a> (СПб, и клуб и школа)"
+      ]
+    }
+  ]
+}

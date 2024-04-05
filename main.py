@@ -22,7 +22,7 @@ ADMIN_USERNAME = "xxldoctor"
 DATA_FILE = "city_users.json"
 
 # Список допустимых chat_id, где бот может быть использован
-ALLOWED_CHATS = {"-1001078882316": "-1001078882316", "-840250661": "test", "-938606890": "test"}
+ALLOWED_CHATS = {"-1001078882316": "mahjong", "-1001182235196": "mahjong", "-1001167521254": "mahjong", "-840250661": "test", "-938606890": "test"}
 
 
 # Загрузка данных из файла
@@ -48,28 +48,30 @@ def save_data_to_file(data):
 
 # Декоратор для проверки chat_id
 def check_chat_id(func):
-    def wrapper(update, context):
-        chat_id = update.effective_chat.id
-        if chat_id not in ALLOWED_CHATS:
-            update.message.reply_text("Извините, но этот бот можно использовать только в определенных чатах.")
-            return
-        # Возвращаем данные, которые могут быть использованы в функции команды
-        return func(update, context, meta_id=ALLOWED_CHATS[chat_id])
-    return wrapper
+  def wrapper(update, context):
+    chat_id = str(update.effective_chat.id)
+    user_id = str(update.effective_user.id)  # Получаем айди пользователя
 
+    # Проверяем, является ли чат личным
+    if chat_id == user_id:
+      # Чат личный, проверяем, есть ли пользователь в списках городов
+      all_user_ids = [user_id for city_users in city_users.get('mahjong', {}).values() for user_id in city_users]
+      if int(user_id) in all_user_ids:
+        # Пользователь найден в списке городов, разрешаем выполнение команды
+        return func(update, context, meta_id='mahjong')
 
-# Запуск бота
-@check_chat_id
-def start(update: Update, _: CallbackContext, meta_id) -> None:
-
-  # Создаем словарь пользователей для нового чата, если его еще нет
-  chat_id = str(update.effective_message.chat_id)
-  if chat_id not in city_users:
-    city_users[chat_id] = {}
-
-  update.message.reply_text("Привет! Я бот, который поможет хранить данные о городах и пользователях в чате.")
-  save_data_to_file(city_users)
-  help(update, _)
+      # Пользователь не найден в списках городов
+      update.message.reply_text("Извините, но вы не числитесь в каком-либо городе. Для использования бота в личке выполните <code>/my_city город</code> в одном из маджонговых чатов.", parse_mode='html')
+      return
+      
+    # Проверяем, что чат находится в списке разрешенных
+    if chat_id not in ALLOWED_CHATS:
+      update.message.reply_text("Извините, но эту команду можно использовать только в определенных чатах.")
+      return
+      
+    # Возвращаем данные, которые могут быть использованы в функции команды
+    return func(update, context, meta_id=ALLOWED_CHATS[chat_id])
+  return wrapper
 
 
 # Справка по командам
@@ -80,7 +82,7 @@ def help(update: Update, _: CallbackContext, meta_id) -> None:
     "/help - Вывести список команд\n"
     "/cities - Вывести список городов с пользователями\n"
     "<code>/users_from_city город</code> - Вывести список пользователей из указанного города\n"
-    "<code>/city_by_user юзернейм</code> - Получить город по упоминанию пользователя\n"
+    # "<code>/city_by_user юзернейм</code> - Получить город по упоминанию пользователя\n"
     "<code>/my_city город</code> - Установить/изменить свой город\n"
     "<code>/leave_city</code> - Удалить себя из текущего города\n"
     "/links - Полезные ссылки\n"
@@ -93,15 +95,14 @@ def help(update: Update, _: CallbackContext, meta_id) -> None:
 def cities(update: Update, _: CallbackContext, meta_id) -> None:
 
   # Получаем список городов для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   users_cities = city_users.get(meta_id, {}).keys()
 
-  if not cities:
-    update.message.reply_text("В этом чате нет данных о городах и пользователях.")
+  if not users_cities:
+    update.message.reply_text("Нет данных о городах и пользователях.")
     return
 
-  cities_list = "\n".join(users_cities)
-  update.message.reply_text(f"Список городов с пользователями в этом чате:\n{cities_list}")
+  cities_list = "\n".join(sorted(users_cities))
+  update.message.reply_text(f"Список городов с пользователями в маджонговых чатах:\n{cities_list}")
 
 
 # Функция для получения пользователей по городу
@@ -116,7 +117,6 @@ def users_from_city(update: Update, context: CallbackContext, meta_id) -> None:
   city = command_parts[1].strip()  # Удаляем лишние пробелы
 
   # Получаем список пользователей для указанного города в текущем чате
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
   users_ids = chat_data.get(city, [])
 
@@ -128,22 +128,26 @@ def users_from_city(update: Update, context: CallbackContext, meta_id) -> None:
     return
 
   if not users_ids:
-    update.message.reply_text(f"В этом чате нет данных о городе {city} или в нем нет пользователей.")
+    update.message.reply_text(f"В маджонговых чатах нет данных о городе {city} или в нем нет пользователей.")
     return
 
   # Список пользователей для упоминания
-  users = [update.effective_chat.get_member(user_id).user for user_id in users_ids]
   mention_list = []
-  for user in users:
-    name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
-    if user.username:
-      mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a> (@{user.username})")
-    else:
-      mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a>")
-
+  for user_id in users_ids:
+    try:
+      member = update.effective_chat.get_member(user_id)
+      user = member.user
+      name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
+      if user.username:
+        mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a> (@{user.username})")
+      else:
+        mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a>")
+    except Exception as e:
+      mention_list.append(f"<a href=\"tg://user?id={user_id}\">ID:{user_id}</a>")
+  
   # Формируем строку с упоминаниями пользователей
   users_list = "\n".join(mention_list)
-
+  
   # Отправляем сообщение без звукового уведомления о городе и списка пользователей
   message_text = f"Пользователи из города {city}:\n{users_list}"
   context.bot.send_message(
@@ -189,7 +193,6 @@ def city_by_user(update: Update, _: CallbackContext, meta_id) -> None:
       return
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   for user_id in user_ids:
@@ -226,7 +229,6 @@ def my_city(update: Update, context: CallbackContext, meta_id) -> None:
     return
 
   # Получим данные о городах и пользователях для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   if not chat_data:
@@ -258,7 +260,6 @@ def leave_city(update: Update, _: CallbackContext, meta_id) -> None:
   user = update.effective_user
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   city = next((city for city, users in chat_data.items() if user.id in users), None)
@@ -317,7 +318,6 @@ def rename_city(update: Update, _: CallbackContext, meta_id) -> None:
     return
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   if old_city not in chat_data:
@@ -374,7 +374,6 @@ def remove_user(update: Update, _: CallbackContext, meta_id) -> None:
       return
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   for user_id in user_ids:
@@ -421,7 +420,6 @@ def remove_city(update: Update, _: CallbackContext, meta_id) -> None:
   city = command_parts[1].strip()  # Удаляем лишние пробелы
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   if city in chat_data:
@@ -442,7 +440,6 @@ def debug(update: Update, _: CallbackContext, meta_id) -> None:
     return
 
   # Получим данные о городах и пользователей для текущего чата
-  # chat_id = str(update.effective_message.chat_id)
   chat_data = city_users.get(meta_id, {})
 
   update.message.reply_text(f"Структура city_users:\n{chat_data}")
@@ -461,7 +458,7 @@ def debug_all(update: Update, _: CallbackContext) -> None:
 
 # Вывод ссылок
 @check_chat_id
-def links(update: Update, _: CallbackContext, meta_id) -> None:
+def linksn(update: Update, _: CallbackContext, meta_id) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("links.json", "r", encoding="utf-8") as file:
     links_list = json.load(file)
@@ -470,6 +467,24 @@ def links(update: Update, _: CallbackContext, meta_id) -> None:
 
   # Отправляем список ссылок в чат
   update.message.reply_text(links_text, parse_mode='html', disable_web_page_preview=True)
+
+
+# Вывод ссылок 2
+@check_chat_id
+def links(update: Update, _: CallbackContext, meta_id) -> None:
+  # Открываем файл с ссылками и читаем их в список
+  with open("linksn.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+  message = "<b>Полезные ссылки:</b>\n"
+
+  for section in data.get('sections', []):
+    message += f"\n<b>{section['title']}</b>\n"
+    for link in section.get('links', []):
+        message += f" - {link}\n"
+
+  # Отправляем список ссылок в чат
+  update.message.reply_text(message, parse_mode='html', disable_web_page_preview=True)
 
 
 # Проверка админправ
@@ -514,7 +529,6 @@ def main() -> None:
 
   # Получение диспетчера для регистрации обработчиков
   dispatcher = updater.dispatcher
-  dispatcher.add_handler(CommandHandler("start", start))
   dispatcher.add_handler(CommandHandler("help", help))
   dispatcher.add_handler(CommandHandler("cities", cities))
   dispatcher.add_handler(CommandHandler("users_from_city", users_from_city))
@@ -527,6 +541,7 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("debug", debug))
   dispatcher.add_handler(CommandHandler("debug_all", debug_all))
   dispatcher.add_handler(CommandHandler("links", links))
+  dispatcher.add_handler(CommandHandler("linksn", linksn))
 
   # Запуск бота
   updater.start_polling()
