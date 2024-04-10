@@ -1,13 +1,10 @@
 from telegram import Update, ChatMember
 from telegram.ext import Updater, CommandHandler, CallbackContext
-from background import keep_alive  # импорт функции для поддержки работоспособности
 import os
 import json
 import logging
 import pip
 pip.main(['install', 'python-telegram-bot==13.13'])
-
-keep_alive()  # запускаем flask-сервер в отдельном потоке.
 
 # Установка уровня логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -76,7 +73,7 @@ def check_chat_id(func):
 
 # Справка по командам
 @check_chat_id
-def help(update: Update, _: CallbackContext, meta_id) -> None:
+def help(update: Update, _: CallbackContext) -> None:
   help_text = (
     "Список доступных команд:\n"
     "/help - Вывести список команд\n"
@@ -458,7 +455,7 @@ def debug_all(update: Update, _: CallbackContext) -> None:
 
 # Вывод ссылок
 @check_chat_id
-def linksn(update: Update, _: CallbackContext, meta_id) -> None:
+def linksn(update: Update, _: CallbackContext) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("links.json", "r", encoding="utf-8") as file:
     links_list = json.load(file)
@@ -471,7 +468,7 @@ def linksn(update: Update, _: CallbackContext, meta_id) -> None:
 
 # Вывод ссылок 2
 @check_chat_id
-def links(update: Update, _: CallbackContext, meta_id) -> None:
+def links(update: Update, _: CallbackContext) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("linksn.json", "r", encoding="utf-8") as file:
     data = json.load(file)
