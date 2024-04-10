@@ -73,7 +73,6 @@ def check_chat_id(func):
 
 
 # Справка по командам
-@check_chat_id
 def help(update: Update, _: CallbackContext) -> None:
   help_text = (
     "Список доступных команд:\n"
@@ -455,7 +454,6 @@ def debug_all(update: Update, _: CallbackContext) -> None:
 
 
 # Вывод ссылок
-@check_chat_id
 def linksn(update: Update, _: CallbackContext) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("links.json", "r", encoding="utf-8") as file:
@@ -468,7 +466,6 @@ def linksn(update: Update, _: CallbackContext) -> None:
 
 
 # Вывод ссылок 2
-@check_chat_id
 def links(update: Update, _: CallbackContext) -> None:
   # Открываем файл с ссылками и читаем их в список
   with open("linksn.json", "r", encoding="utf-8") as file:
