@@ -10,7 +10,8 @@ pip.main(['install', 'python-telegram-bot==13.13'])
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Ваш токен бота, полученный от @BotFather
-TOKEN = os.environ['bot_token']
+# TOKEN = os.environ['bot_token']
+TOKEN = "5950642026:AAH3Gp6UTnA6ORplu8BSDivs_H8xtSb6PW0"
 
 # Имя пользователя администратора
 ADMIN_USERNAME = "xxldoctor"
