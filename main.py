@@ -248,7 +248,8 @@ def my_city(update: Update, context: CallbackContext, meta_id) -> None:
   save_data_to_file(city_users)
 
   update.message.reply_text(f"Ваш город изменен на: {new_city}")
-  users_from_city(update, context)
+  if new_city not in ["Москва", "Санкт-Петербург"]
+    users_from_city(update, context)
 
 
 # Функция для удаления пользователя из города
