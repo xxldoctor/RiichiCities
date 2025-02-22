@@ -3,15 +3,18 @@ from telegram.ext import Updater, CommandHandler, CallbackContext
 import os
 import json
 import logging
-import pip
-pip.main(['install', 'python-telegram-bot==13.13'])
+#import pip
+#pip.main(['install', 'python-telegram-bot==13.13'])
 
 # Установка уровня логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Ваш токен бота, полученный от @BotFather
 # TOKEN = os.environ['bot_token']
-TOKEN = "5950642026:AAH3Gp6UTnA6ORplu8BSDivs_H8xtSb6PW0"
+TOKEN = none
+
+with open(token.txt) as f:
+  Token = f.read().strip()
 
 # Имя пользователя администратора
 ADMIN_USERNAME = "xxldoctor"
