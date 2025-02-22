@@ -111,8 +111,9 @@ def help(update: Update, _: CallbackContext, meta_id) -> None:
         "для повёрнутого тайла используйте дефис перед ним - `-1m`,\n"
         "два повёрнутых подряд стакаются как в апгрейде пона до кана\n"
       )
-      
+    update.message.reply_text(help_text, parse_mode='html')
   return wrapper
+  
   #if chat_id not in ALLOWED_CHATS:
     #help_text = (
       #"Список доступных команд:\n"
@@ -143,7 +144,7 @@ def help(update: Update, _: CallbackContext, meta_id) -> None:
       #"два повёрнутых подряд стакаются как в апгрейде пона до кана\n"
     #)
   
-  update.message.reply_text(help_text, parse_mode='html')
+  #update.message.reply_text(help_text, parse_mode='html')
 
 
 # Функция возвращающая список городов с пользователями
