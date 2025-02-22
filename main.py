@@ -88,6 +88,9 @@ def help(update: Update, _: CallbackContext) -> None:
     "<code>/my_city город</code> - Установить/изменить свой город\n"
     "<code>/leave_city</code> - Удалить себя из текущего города\n"
     "/links - Полезные ссылки\n"
+    "/hand - Сделать изображение руки. Формат - 19m19p19s1234z567z_0m (пример - кокуши с 13сторонним ожиданием и акадорой взятой со стены),\n"
+    "для пробелов в руке используйте нижнее подчёркивание - `_`, для тайла рубашкой используйте заглавную латинскю i - `I`,\n"
+    "для того чтобы повернуть тайл используйте дефис перед его обозначением- `-1m` (два повёрнутых подряд стакаются как в апгрейде пона до кана)/n"
   )
   update.message.reply_text(help_text, parse_mode='html')
 
@@ -489,7 +492,7 @@ def links(update: Update, _: CallbackContext) -> None:
 
 
 # Отрисовка руки
-def (update: Update, _: CallbackContext) -> None:
+def hand(update: Update, _: CallbackContext) -> None:
 
   command_parts = update.message.text.strip().split(None, 1)
 
@@ -560,6 +563,7 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("debug_all", debug_all))
   dispatcher.add_handler(CommandHandler("links", links))
   dispatcher.add_handler(CommandHandler("linksn", linksn))
+  dispatcher.add_handler(CommandHandler("hand", hand))
 
   # Запуск бота
   updater.start_polling()
