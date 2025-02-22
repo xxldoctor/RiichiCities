@@ -11,10 +11,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 # Ваш токен бота, полученный от @BotFather
 # TOKEN = os.environ['bot_token']
-TOKEN = none
+TOKEN = None
 
-with open(token.txt) as f:
-  Token = f.read().strip()
+with open(TOKEN_FILE, "r") as f:
+  TOKEN = f.read().strip()
+
+TOKEN_FILE = "token.txt"
 
 # Имя пользователя администратора
 ADMIN_USERNAME = "xxldoctor"
