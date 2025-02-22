@@ -488,6 +488,23 @@ def links(update: Update, _: CallbackContext) -> None:
   update.message.reply_text(message, parse_mode='html', disable_web_page_preview=True)
 
 
+# Отрисовка руки
+def (update: Update, _: CallbackContext) -> None:
+
+  command_parts = update.message.text.strip().split(None, 1)
+
+  if len(command_parts) < 2:
+    update.message.reply_text("Вы не указали руку для отображения.")
+    return
+
+  if len(command_parts) > 2:
+    update.message.reply_text("Неверный формат руки.")
+    return
+
+  hand = "https://api.tempai.net/image/" + command_parts[1].strip() + ".png"  
+  update.message.reply_text(hand)
+
+
 # Проверка админправ
 def is_admin(update):
   user = update.effective_user
