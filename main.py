@@ -78,7 +78,7 @@ def check_chat_id(func):
 
 
 # Справка по командам
-def help(update: Update, _: CallbackContext) -> None:
+def help(update: Update, _: CallbackContext, meta_id) -> None:
   if chat_id not in ALLOWED_CHATS:
     help_text = (
       "Список доступных команд:\n"
