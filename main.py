@@ -95,7 +95,6 @@ def help(update: Update, _: CallbackContext) -> None:
     "для повёрнутого тайла используйте дефис перед ним - `-1m`,\n"
     "два повёрнутых подряд стакаются как в апгрейде пона до кана\n"
   )
-  
   update.message.reply_text(help_text, parse_mode='html')
 
 
