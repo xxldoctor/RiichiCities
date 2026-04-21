@@ -1,5 +1,5 @@
-from telegram import Update, ChatMember
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import Update, ChatMember, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler
 import os
 import json
 import logging
@@ -465,33 +465,120 @@ def debug_all(update: Update, _: CallbackContext) -> None:
   update.message.reply_text(f"Структура city_users:\n{city_users}")
 
 
-# Вывод ссылок
-def linksn(update: Update, _: CallbackContext) -> None:
-  # Открываем файл с ссылками и читаем их в список
+# Вывод ссылок (интерактивное меню)
+def linksn(update: Update, context: CallbackContext) -> None:
   with open("links.json", "r", encoding="utf-8") as file:
-    links_list = json.load(file)
+    data = json.load(file)
 
-  links_text = "\n".join(links_list)
-
-  # Отправляем список ссылок в чат
-  update.message.reply_text(links_text, parse_mode='html', disable_web_page_preview=True)
+  text, reply_markup = generate_links_menu(data, prefix="linksn_")
+  update.message.reply_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
 
-# Вывод ссылок 2
-def links(update: Update, _: CallbackContext) -> None:
-  # Открываем файл с ссылками и читаем их в список
+def linksn_callback(update: Update, context: CallbackContext) -> None:
+  query = update.callback_query
+  query.answer()
+
+  if query.data == "linksn_close":
+    query.message.delete()
+    return
+
+  path = ""
+  if query.data == "linksn_root":
+    path = ""
+  elif query.data.startswith("linksn_"):
+    path = query.data[7:]
+
+  with open("links.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+  text, reply_markup = generate_links_menu(data, path, prefix="linksn_")
+
+  if query.message.text_html == text and query.message.reply_markup == reply_markup:
+      return
+
+  query.edit_message_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
+
+
+# Вывод ссылок 2 (интерактивное меню)
+def links(update: Update, context: CallbackContext) -> None:
   with open("linksn.json", "r", encoding="utf-8") as file:
     data = json.load(file)
 
-  message = "<b>Полезные ссылки:</b>\n"
+  text, reply_markup = generate_links_menu(data)
+  update.message.reply_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
-  for section in data.get('sections', []):
-    message += f"\n<b>{section['title']}</b>\n"
-    for link in section.get('links', []):
-        message += f" - {link}\n"
 
-  # Отправляем список ссылок в чат
-  update.message.reply_text(message, parse_mode='html', disable_web_page_preview=True)
+def generate_links_menu(data, path="", prefix="links_"):
+  # Находим нужную секцию по пути (path)
+  current = data
+  path_parts = path.split('.') if path else []
+
+  for part in path_parts:
+    if not part: continue
+    found = False
+    for section in current.get('sections', []):
+      if section.get('id') == part:
+        current = section
+        found = True
+        break
+    if not found:
+      break
+
+  title = current.get('title', 'Полезные ссылки')
+  message = f"<b>{title}</b>\n"
+
+  keyboard = []
+
+  # Добавляем подсекции как кнопки
+  if 'sections' in current:
+    for section in current['sections']:
+      callback_data = f"{prefix}{path}.{section['id']}" if path else f"{prefix}{section['id']}"
+      keyboard.append([InlineKeyboardButton(section['title'], callback_data=callback_data)])
+
+  # Добавляем ссылки в текст сообщения
+  if 'links' in current:
+    message += "\n"
+    for link in current['links']:
+      message += f" - {link}\n"
+
+  # Кнопка "Назад"
+  navigation_row = []
+  if path:
+    parent_path = ".".join(path_parts[:-1])
+    callback_data = f"{prefix}{parent_path}" if parent_path else f"{prefix}root"
+    navigation_row.append(InlineKeyboardButton("⬅️ Назад", callback_data=callback_data))
+
+  # Кнопка "Закрыть"
+  navigation_row.append(InlineKeyboardButton("❌ Закрыть", callback_data=f"{prefix}close"))
+  keyboard.append(navigation_row)
+
+  return message, InlineKeyboardMarkup(keyboard)
+
+
+def links_callback(update: Update, context: CallbackContext) -> None:
+  query = update.callback_query
+  query.answer()
+
+  if query.data == "links_close":
+    query.message.delete()
+    return
+
+  path = ""
+  if query.data == "links_root":
+    path = ""
+  elif query.data.startswith("links_"):
+    path = query.data[6:]
+
+  with open("linksn.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+  text, reply_markup = generate_links_menu(data, path)
+
+  # Проверяем, изменилось ли содержимое, чтобы избежать ошибки "Message is not modified"
+  if query.message.text_html == text and query.message.reply_markup == reply_markup:
+      return
+
+  query.edit_message_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
 
 # Отрисовка руки
@@ -567,6 +654,8 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("links", links))
   dispatcher.add_handler(CommandHandler("linksn", linksn))
   dispatcher.add_handler(CommandHandler("hand", hand))
+  dispatcher.add_handler(CallbackQueryHandler(links_callback, pattern="^links_"))
+  dispatcher.add_handler(CallbackQueryHandler(linksn_callback, pattern="^linksn_"))
 
   # Запуск бота
   updater.start_polling()
