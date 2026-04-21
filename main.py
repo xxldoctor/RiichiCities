@@ -466,42 +466,8 @@ def debug_all(update: Update, _: CallbackContext) -> None:
 
 
 # Вывод ссылок (интерактивное меню)
-def linksn(update: Update, context: CallbackContext) -> None:
-  with open("links.json", "r", encoding="utf-8") as file:
-    data = json.load(file)
-
-  text, reply_markup = generate_links_menu(data, prefix="linksn_")
-  update.message.reply_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
-
-
-def linksn_callback(update: Update, context: CallbackContext) -> None:
-  query = update.callback_query
-  query.answer()
-
-  if query.data == "linksn_close":
-    query.message.delete()
-    return
-
-  path = ""
-  if query.data == "linksn_root":
-    path = ""
-  elif query.data.startswith("linksn_"):
-    path = query.data[7:]
-
-  with open("links.json", "r", encoding="utf-8") as file:
-    data = json.load(file)
-
-  text, reply_markup = generate_links_menu(data, path, prefix="linksn_")
-
-  if query.message.text_html == text and query.message.reply_markup == reply_markup:
-      return
-
-  query.edit_message_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
-
-
-# Вывод ссылок 2 (интерактивное меню)
 def links(update: Update, context: CallbackContext) -> None:
-  with open("linksn.json", "r", encoding="utf-8") as file:
+  with open("links.json", "r", encoding="utf-8") as file:
     data = json.load(file)
 
   text, reply_markup = generate_links_menu(data)
@@ -569,7 +535,7 @@ def links_callback(update: Update, context: CallbackContext) -> None:
   elif query.data.startswith("links_"):
     path = query.data[6:]
 
-  with open("linksn.json", "r", encoding="utf-8") as file:
+  with open("links.json", "r", encoding="utf-8") as file:
     data = json.load(file)
 
   text, reply_markup = generate_links_menu(data, path)
