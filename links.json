@@ -25,15 +25,79 @@
         {
           "id": "offline",
           "title": "Офлайн клубы, группы и чаты городов",
-          "links": [
-            "<a href=\"https://vk.com/riichi_msk\">Агари</a> (VK группа, Москва)",
-            "<a href=\"https://vk.com/furin_mahjong\">Фурин</a> (VK группа, Москва)",
-            "<a href=\"https://t.me/furin_mahjong\">Фурин</a> (ТГ чат, Москва)",
-            "<a href=\"https://vk.com/seihoku\">Сейхоку</a> (VK группа, Санкт-Петербург)",
-            "<a href=\"https://t.me/+RVYiEs0LmyI0Njhi\">Гекко</a> (ТГ чат, Санкт-Петербург)",
-            "<a href=\"https://t.me/riichi_spb\">Риичи маджонг в Санкт-Петербурге</a> (ТГ чат, Санкт-Петербург)",
-            "<a href=\"https://t.me/sm_mahjong\">Байман, скрытый в листве 🍃</a> (ТГ канал, Королёв)",
-            "<a href=\"https://t.me/+nKLrbO318FwzOTNi\">Мартенхо</a> (ТГ чат, Уфа)"
+          "sections": [
+            {
+              "id": "tg",
+              "title": "Чаты и каналы в телеграме",
+              "links": [
+                "<a href=\"https://t.me/furin_mahjong\">Фурин (Москва)</a>",
+                "<a href=\"https://t.me/+RVYiEs0LmyI0Njhi\">Гекко (Санкт-Петербург)</a>",
+                "<a href=\"https://t.me/riichi_spb\">Риичи маджонг в Санкт-Петербурге</a>",
+                "<a href=\"https://t.me/+nKLrbO318FwzOTNi\">Мартенхо (Уфа)</a>",
+                "<a href=\"https://t.me/furiten_nsk\">Фуритен (Новосибирск)</a>",
+                "<a href=\"https://t.me/mahjong_samara\">Риичи номи (Самара)</a>",
+                "<a href=\"https://t.me/+mV9gFMcM1UwwZjli\">Братство дискарда (Киров)</a>",
+                "<a href=\"https://t.me/parenchan_rostov\">Паренчан (Ростов-На-Дону)</a>",
+                "<a href=\"https://t.me/mahjong_saratov\">Сан-Бики (Саратов)</a>",
+                "<a href=\"https://t.me/yaroslavl_riichi\">Яриинчи (Ярославль)</a>",
+                "<a href=\"https://t.me/mahjongvdk\">Сижу в фуритене (Владивосток)</a>",
+                "<a href=\"https://t.me/+gwFCIt2Nk7ozNDMy\">ЧЕ (Череповец)</a>",
+                "<a href=\"https://t.me/+c-yaBKB4JRExYTky\">Zillant (Казань)</a>",
+                "<a href=\"https://t.me/+RgkywHtNTfkwMjRi\">Нижневартовск</a>",
+                "<a href=\"https://t.me/tesuji_club\">Тесудзи (Москва)</a> (канал)",
+                "<a href=\"https://t.me/riichi_nvrsk\">МаджонГо (Новороссийск)</a> (канал)",
+                "<a href=\"https://t.me/hbkmahjong\">Хабаровск</a> (канал)",
+                "<a href=\"https://t.me/sm_mahjong\">Байман, скрытый в листве (Королёв)</a> (канал)"
+              ]
+            },
+            {
+              "id": "vk",
+              "title": "Группы вконтакте",
+              "links": [
+                "<a href=\"https://vk.com/riichi_msk\">Агари (Москва)</a>",
+                "<a href=\"https://vk.com/furin_mahjong\">Фурин (Москва)</a>",
+                "<a href=\"https://vk.com/tesuji\">Тесудзи (Москва)</a>",
+                "<a href=\"https://vk.com/seihoku\">Сейхоку (Санкт-Петербург)</a>",
+                "<a href=\"https://vk.com/riichiarh\">Архангельск</a>",
+                "<a href=\"https://vk.com/club67426620\">AKADORA, Барнаул</a>",
+                "<a href=\"https://vk.com/riichimahjongdvfu\">Сижу в фуритене, Владивосток</a>",
+                "<a href=\"https://vk.com/riichy_mahjong\">Волгоград</a>",
+                "<a href=\"https://vk.com/hakunoten\">Haku no Ten (Вологда)</a>",
+                "<a href=\"https://vk.com/riichi_vrn\">Воронеж</a>",
+                "<a href=\"https://vk.com/club42560800\">Midori Hi (Екатеринбург)</a>",
+                "<a href=\"https://vk.com/ivanovo_damaten\">Даматен (Иваново)</a>",
+                "<a href=\"https://vk.com/riichi_mahjong_irk\">Риншан кайхо (Иркутск)</a>",
+                "<a href=\"https://vk.com/club184230779\">Zillant (Казань)</a>",
+                "<a href=\"https://vk.com/kirovriichimahjong\">Братство дискарда (Киров)</a>",
+                "<a href=\"https://vk.com/club49074927\">Красноярск</a>",
+                "<a href=\"https://vk.com/riichi_murmansk\">Hokusei-fū (Мурманск)</a>",
+                "<a href=\"https://vk.com/riichi_nv\">Нижневартовск</a>",
+                "<a href=\"https://vk.com/riichinnov\">Нижний Новгород</a>",
+                "<a href=\"https://vk.com/nt.red.dragon\">Красный дракон (Нижний Тагил)</a>",
+                "<a href=\"https://vk.com/riichi_nvrsk\">МаджонГо (Новороссийск)</a>",
+                "<a href=\"https://vk.com/furiten\">Фуритен (Новосибирск)</a>",
+                "<a href=\"https://vk.com/kazenokanchi\">Канчи ветров (Омск)</a>",
+                "<a href=\"https://vk.com/parenchan\">Паренчан (Ростов-На-Дону)</a>",
+                "<a href=\"https://vk.com/mahjong_samara\">Риичи номи (Самара)</a>",
+                "<a href=\"https://vk.com/club230622547\">Сан-Бики (Саратов)</a>",
+                "<a href=\"https://vk.com/sarovplay\">Ветер удачи (Саров)</a>",
+                "<a href=\"https://vk.com/club130770599\">Северодвинск</a>",
+                "<a href=\"https://vk.com/riichi_smolensk\">Живая стена (Смоленск)</a>",
+                "<a href=\"https://vk.com/mahjongtmb\">Чёрный дракон (Тамбов)</a>",
+                "<a href=\"https://vk.com/club46111825\">Тверь</a>",
+                "<a href=\"https://vk.com/mahjong_tomsk\">Томск</a>",
+                "<a href=\"https://vk.com/mahjongtmn\">Якухай (Тюмень)</a>",
+                "<a href=\"https://vk.com/club100183340\">Семь ветров (Ульяновск)</a>",
+                "<a href=\"https://vk.com/mahjongufa\">Мартенхо (Уфа)</a>",
+                "<a href=\"https://vk.com/mahjong_khv\">Хигаси (Хабаровск)</a>",
+                "<a href=\"https://vk.com/chiponkan_hm\">ЧиПонКан (Ханты-Мансийск)</a>",
+                "<a href=\"https://vk.com/riichi_chel\">Челябинск</a>",
+                "<a href=\"https://vk.com/stalmahjong\">Ренчан (Электросталь)</a>",
+                "<a href=\"https://vk.com/sakhriichi\">Карафуто (Южно-Сахалинск)</a>",
+                "<a href=\"https://vk.com/yktriichi\">Плезиозавр (Якутск)</a>",
+                "<a href=\"https://vk.com/club102123246\">Ярославль</a>"
+              ]
+            }
           ]
         }
       ]
@@ -105,8 +169,12 @@
             "<a href=\"https://riichimahjong.org\">Пантеон</a> (система рейтингов)",
             "<a href=\"https://t.me/pantheon_support\">Чат поддержки Портала и Пантеона</a>",
             "<a href=\"https://t.me/tenhou\">7994</a> - конференция для общения",
+            "<a href=\"https://t.me/kawaleague\">Кава-лига</a>",
             "<a href=\"https://t.me/riichi_tournament\">Конференция онлайн турниров</a>",
-            "<a href=\"https://t.me/riichi_mahjong\">Новости риичи-маджонга в России</a>"
+            "<a href=\"https://t.me/riichi_mahjong\">Новости риичи-маджонга в России</a>",
+            "<a href=\"https://t.me/mahjongru\">Новости маджонга в России</a> (не только риичи)",
+            "<a href=\"https://t.me/rumahjong/23317\">Общий чат о маджонге в России</a> (ссылка на ветку риичи)",
+            "<a href=\"https://t.me/mahjongfm\">Новости Федерации Маджонга России</a>"
           ]
         },
         {
@@ -137,6 +205,7 @@
           "links": [
             "<a href=\"https://t.me/mahjong_capi\">Стримы японского маджонга (капибары-воители)</a> (блог Сергея Алёшина)",
             "<a href=\"https://t.me/toreachsomething\">Reach!</a> (блог Алексея Леонтьева)",
+            "<a href=\"https://vk.com/anchan_no_maajan\">anchan no maajan</a> (блог Андрея Максимова)",
             "<a href=\"https://t.me/riichi_one_outs\">One outs Riichi</a> (блог Александра Гончаренко)",
             "<a href=\"https://t.me/guri_chan_no_majyan\">Маджонг Гури чан</a> (блог Григория Вовненко)",
             "<a href=\"https://t.me/Under3Riichi\">🀄️Под тремя риичи🀄️</a> (блог Ильи Егорова)"
@@ -159,7 +228,9 @@
             "<a href=\"https://t.me/mahjong_fucking_casino\">Записки про походы в дзянсо</a>",
             "<a href=\"https://t.me/temakichi\">Творчество Temakichi</a>",
             "<a href=\"https://t.me/newmleaguecommunity\">Обсуждение М-лиги</a>",
-            "<a href=\"https://files.riichi.moe/mjg/\">Файловое хранилище с контентом по маджонгу</a> (Арты, книги, игры, фильмы, итд)"
+            "<a href=\"https://vk.com/riichimems\">VK группа с маджонг-мемами</a>",
+            "<a href=\"https://t.me/mehjong\">ТГ канал с маджонг-мемами</a>",
+            "<a href=\"https://files.riichi.moe/mjg/\">Файловое хранилище с контентом по маджонгу</a> (арты, книги, игры, фильмы, итд)"
           ]
         },
         {
@@ -196,6 +267,7 @@
             "М-Лига:",
             "https://t.me/addstickers/M_League",
             "https://t.me/addstickers/M_League_old",
+            "https://t.me/addstickers/NihonPuroMajanMemei",
             "",
             "NAGA:",
             "https://t.me/addstickers/Advice_Naga"
