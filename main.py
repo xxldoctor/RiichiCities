@@ -465,24 +465,38 @@ def debug_all(update: Update, _: CallbackContext) -> None:
   update.message.reply_text(f"Структура city_users:\n{city_users}")
 
 
-# Вывод ссылок (устаревшая команда, теперь выводит плоский список из linksn.json)
-def linksn(update: Update, _: CallbackContext) -> None:
-  with open("linksn.json", "r", encoding="utf-8") as file:
+# Вывод ссылок (интерактивное меню)
+def linksn(update: Update, context: CallbackContext) -> None:
+  with open("links.json", "r", encoding="utf-8") as file:
     data = json.load(file)
 
-  def extract_links(node):
-    links = []
-    if 'links' in node:
-      links.extend(node['links'])
-    if 'sections' in node:
-      for section in node['sections']:
-        links.extend(extract_links(section))
-    return links
+  text, reply_markup = generate_links_menu(data, prefix="linksn_")
+  update.message.reply_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
-  all_links = extract_links(data)
-  message = "<b>Все полезные ссылки:</b>\n\n" + "\n".join(all_links)
 
-  update.message.reply_text(message, parse_mode='html', disable_web_page_preview=True)
+def linksn_callback(update: Update, context: CallbackContext) -> None:
+  query = update.callback_query
+  query.answer()
+
+  if query.data == "linksn_close":
+    query.message.delete()
+    return
+
+  path = ""
+  if query.data == "linksn_root":
+    path = ""
+  elif query.data.startswith("linksn_"):
+    path = query.data[7:]
+
+  with open("links.json", "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+  text, reply_markup = generate_links_menu(data, path, prefix="linksn_")
+
+  if query.message.text_html == text and query.message.reply_markup == reply_markup:
+      return
+
+  query.edit_message_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
 
 # Вывод ссылок 2 (интерактивное меню)
@@ -494,7 +508,7 @@ def links(update: Update, context: CallbackContext) -> None:
   update.message.reply_text(text, reply_markup=reply_markup, parse_mode='html', disable_web_page_preview=True)
 
 
-def generate_links_menu(data, path=""):
+def generate_links_menu(data, path="", prefix="links_"):
   # Находим нужную секцию по пути (path)
   current = data
   path_parts = path.split('.') if path else []
@@ -518,7 +532,7 @@ def generate_links_menu(data, path=""):
   # Добавляем подсекции как кнопки
   if 'sections' in current:
     for section in current['sections']:
-      callback_data = f"links_{path}.{section['id']}" if path else f"links_{section['id']}"
+      callback_data = f"{prefix}{path}.{section['id']}" if path else f"{prefix}{section['id']}"
       keyboard.append([InlineKeyboardButton(section['title'], callback_data=callback_data)])
 
   # Добавляем ссылки в текст сообщения
@@ -531,11 +545,11 @@ def generate_links_menu(data, path=""):
   navigation_row = []
   if path:
     parent_path = ".".join(path_parts[:-1])
-    callback_data = f"links_{parent_path}" if parent_path else "links_root"
+    callback_data = f"{prefix}{parent_path}" if parent_path else f"{prefix}root"
     navigation_row.append(InlineKeyboardButton("⬅️ Назад", callback_data=callback_data))
 
   # Кнопка "Закрыть"
-  navigation_row.append(InlineKeyboardButton("❌ Закрыть", callback_data="links_close"))
+  navigation_row.append(InlineKeyboardButton("❌ Закрыть", callback_data=f"{prefix}close"))
   keyboard.append(navigation_row)
 
   return message, InlineKeyboardMarkup(keyboard)
@@ -641,6 +655,7 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("linksn", linksn))
   dispatcher.add_handler(CommandHandler("hand", hand))
   dispatcher.add_handler(CallbackQueryHandler(links_callback, pattern="^links_"))
+  dispatcher.add_handler(CallbackQueryHandler(linksn_callback, pattern="^linksn_"))
 
   # Запуск бота
   updater.start_polling()
