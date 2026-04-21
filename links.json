@@ -9,27 +9,38 @@
           "id": "online",
           "title": "Онлайн",
           "links": [
-            "<a href=\"https://tenhou.net/3/?L7994\">Лобби 7994/3</a> (в вебклиенте/мобильном приложении)",
+            "<a href=\"https://tenhou.net/3/?L7994\">Лобби 7994/3 на Тенхо</a> (в вебклиенте/мобильном приложении)",
             "<a href=\"http://tesuji-club.ru/riichi-online/guide-tenhou-web\">Гайд по вебклиенту</a>",
-            "<a href=\"https://tenhou.net/4/?L7994\">Лобби 7994/4</a> (в 4K клиенте)",
+            "<a href=\"https://tenhou.net/4/?L7994\">Лобби 7994/4 на Тенхо</a> (в 4K клиенте)",
             "<a href=\"http://tesuji-club.ru/riichi-online/gajd-po-igre-na-yaponskom-riichi-servere-tenhou-net\">Гайд по флешклиенту (примерно подходит для понимания 4K клиента)</a>",
-            "<a href=\"https://vk.com/@seihoku-mahjong-apps\">Список приложений</a>"
+            "<a href=\"https://addons.mozilla.org/ru/firefox/addon/tenhou-ui-translator\">Расширение для перевода Тенхо</a> (работает только в вебклиенте в Firefox)",
+            "<a href=\"https://addons.mozilla.org/ru/firefox/addon/tenhou-ui-for-3/\">И ещё одно</a> (Firefox, с альтернативным дизайном кнопок)",
+            "<a href=\"https://chromewebstore.google.com/detail/tenhou-ui+-for-3/ncgfckbjngkpmioedkhjneanhmkelfhb?pli=1\">Расширение для перевода Тенхо</a> (работает только в вебклиенте в Chromium-based браузерах)",
+            "<a href=\"https://chromewebstore.google.com/detail/tenhou-english-ui/jdackjfahmdepglkioclfdhbhdplnana\">И ещё одно</a> (Chromium-based, с альтернативным дизайном кнопок)",
+            "<a href=\"https://autotable.riichi.moe/\">Реализация автостола онлайн</a> (вся механика игры кроме постройки стен - на игроках, кроме того - есть майнфилд, бамбуки, вашизу)",
+            "<a href=\"https://riichiadvanced.com\">Riichi Advanced</a> (Платформа с реализацией всевозможных опциональных правил, есть и оффлайн и онлайн (без матчмейкинга))",
+            "<a href=\"https://vk.com/@seihoku-mahjong-apps\">Список приложений</a> (в том числе оффлайн)"
           ]
         },
         {
           "id": "offline",
-          "title": "Офлайн (клубы, школы)",
+          "title": "Офлайн клубы, группы и чаты городов",
           "links": [
-            "<a href=\"https://vk.com/riichi_msk\">Агари</a> (Москва, клуб)",
-            "<a href=\"https://t.me/mushroom_mahjong\">Mushroom</a> (Москва, школа)",
-            "<a href=\"https://vk.com/seihoku\">Сейхоку</a> (СПб, и клуб и школа)"
+            "<a href=\"https://vk.com/riichi_msk\">Агари</a> (VK группа, Москва)",
+            "<a href=\"https://vk.com/furin_mahjong\">Фурин</a> (VK группа, Москва)",
+            "<a href=\"https://t.me/furin_mahjong\">Фурин</a> (ТГ чат, Москва)",
+            "<a href=\"https://vk.com/seihoku\">Сейхоку</a> (VK группа, Санкт-Петербург)",
+            "<a href=\"https://t.me/+RVYiEs0LmyI0Njhi\">Гекко</a> (ТГ чат, Санкт-Петербург)",
+            "<a href=\"https://t.me/riichi_spb\">Риичи маджонг в Санкт-Петербурге</a> (ТГ чат, Санкт-Петербург)",
+            "<a href=\"https://t.me/sm_mahjong\">Байман, скрытый в листве 🍃</a> (ТГ канал, Королёв)",
+            "<a href=\"https://t.me/+nKLrbO318FwzOTNi\">Мартенхо</a> (ТГ чат, Уфа)"
           ]
         }
       ]
     },
     {
       "id": "learn",
-      "title": "Обучение и инструменты",
+      "title": "Обучение, инструменты и тренажёры",
       "sections": [
         {
           "id": "theory",
@@ -39,17 +50,20 @@
             "<a href=\"https://riichi-mitya.blogspot.ru\">Блог о риичи-маджонге в цифрах</a>",
             "<a href=\"https://t.me/newteachingcommunity\">Тичинг</a> - конференция для развития в маджонге",
             "<a href=\"https://t.me/ittakunanikiru\">IttakuNanikiru</a> - сборник профессиональных задач",
+            "<a href=\"https://t.me/riichibasics\">Ещё один сборник наникири</a> (заброшен)",
             "<a href=\"https://t.me/kucmahjong\">KucMahjong</a> - переводы рандомных постов",
-            "<a href=\"https://t.me/mushroom_mahjong\">Mushroom</a> (школа в Москве)",
-            "<a href=\"https://t.me/riichi_en_ru_books\">Риичи-библиотека</a>"
+            "<a href=\"https://t.me/riichi_en_ru_books\">Риичи-библиотека</a> (переводы книг)",
+            "<a href=\"https://t.me/JP_RiichiBooks\">Японские книги по риичи</a> (без перевода)",
+            "<a href=\"https://t.me/nekoizdat\">Переводы от Фриды Юмецуки</a>",
+            "<a href=\"https://drive.google.com/file/d/1SIRhwrmFn9PNg-XQECyB85wjpeXqndwQ/view\">Перевод Riichi Book 1</a> (не полный)"
           ]
         },
         {
           "id": "tools",
           "title": "Инструменты",
           "links": [
-            "<a href=\"https://nodocchi.moe/tenhoulog\">Статистика по играм на тенхе</a>",
-            "<a href=\"https://amae-koromo.sapk.ch\">Статистика по играм на маджсоуле</a>",
+            "<a href=\"https://nodocchi.moe/tenhoulog\">Статистика по играм на TH</a>",
+            "<a href=\"https://amae-koromo.sapk.ch\">Статистика по играм на MS</a>",
             "<a href=\"https://tempai.net/ru/eff\">Калькулятор эффективного сбора</a>",
             "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Тренажёр эффективного сбора</a>",
             "<a href=\"https://kobalab.net/majiang/dapai.html\">Калькулятор Kobalab</a>",
@@ -58,16 +72,30 @@
             "<a href=\"https://sagisawa.0am.jp/akochandaaaaa\">Тренировка сбора руки Pystyle</a>",
             "<a href=\"https://mjai.ekyu.moe/ru.html\">Разбор игр нейросетью Mortal</a>",
             "<a href=\"https://naga.dmv.nico/naga_report/top\">Разбор игр нейросетью Naga</a>",
+            "<a href=\"https://review.bigcoach.work/?lang=en\">Разбор игр нейросетью Big Coach</a>",
             "<a href=\"https://t.me/nagariichi/4\">Пояснения к интерфейсу Наги</a>",
+            "<a href=\"https://injusticejudge.com/\">Анализатор \"несправедливости\"</a> (работает с TH/MS/RC)",
+            "<a href=\"https://golfsoftware.com/tools/schedule/playall.html\">Генератор фиксированных рассадок</a> (требует обязательного перемешивания ветров)",
+            "<a href=\"https://zenodo.org/records/13971404\">Уже сгенерированные рассадки</a> (от 16 до 172 игроков, на до 15 ханчанов включительно)"
+          ]
+        },
+        {
+          "id": "trainers",
+          "title": "Тренажёры",
+          "links": [
             "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer Bot</a>",
-            "<a href=\"https://t.me/TempaiBot\">Ракаги Шигеров</a>"
+            "<a href=\"https://t.me/TempaiBot\">Ракаги Шигеров</a>",
+            "<a href=\"https://mj.fyisvia.com/point-calculation\">Тренажёр подсчёта очков</a>",
+            "<a href=\"https://mj.fyisvia.com/hand-point-calculation\">Тренажёр подсчёта стоимости руки</a>",
+            "<a href=\"https://mj.fyisvia.com/efficiency-train\">Тренажёр эффективных сбросов</a>",
+            "<a href=\"https://mj.fyisvia.com/pure-ones-tenpai\">Тренажёр поиска сложны ожиданий</a> (одноцветы)"
           ]
         }
       ]
     },
     {
       "id": "community",
-      "title": "Сообщество и стримы",
+      "title": "Сообщество, блоги и стримы",
       "sections": [
         {
           "id": "social",
@@ -85,7 +113,6 @@
           "id": "streams",
           "title": "Стримы",
           "links": [
-            "<a href=\"https://www.twitch.tv/shimm3rko\">Виктор Гришин</a>",
             "<a href=\"https://www.youtube.com/@andreimaximov7063\">Андрей Максимов</a>",
             "<a href=\"https://www.twitch.tv/gererbo\">Сергей Алёшин</a>",
             "<a href=\"https://www.twitch.tv/enzegeitor\">Александр Гончаренко</a>",
@@ -94,22 +121,86 @@
             "<a href=\"https://www.twitch.tv/vitalpicnic\">Виталий Борзоногов</a>",
             "<a href=\"https://www.twitch.tv/dalex026\">Алексей Дергунов</a>",
             "<a href=\"https://www.twitch.tv/zekses\">Николай Марченко</a>",
-            "<a href=\"https://www.twitch.tv/opkos\">Константин Опарин</a>"
+            "<a href=\"https://www.twitch.tv/opkos\">Константин Опарин</a>",
+            "<a href=\"https://www.twitch.tv/youmu_ch\">Василий Кузнецов</a>",
+            "<a href=\"https://www.twitch.tv/qweqwe112123\">Андрей Туманин</a>",
+            "<a href=\"https://www.twitch.tv/grendelink\">Игорь Смирнов</a>",
+            "<a href=\"https://www.twitch.tv/violetmamba\">Матвей Рубанов</a>",
+            "<a href=\"https://www.twitch.tv/hard1kk\">Филипп Троценко</a>",
+            "<a href=\"https://www.twitch.tv/yourksenia\">Ксения Лысанюк</a>",
+            "<a href=\"https://www.twitch.tv/turbomouse\">Имя Неизвестно</a>"
+          ]
+        },
+        {
+          "id": "blogs",
+          "title": "Блоги",
+          "links": [
+            "<a href=\"https://t.me/mahjong_capi\">Стримы японского маджонга (капибары-воители)</a> (блог Сергея Алёшина)",
+            "<a href=\"https://t.me/toreachsomething\">Reach!</a> (блог Алексея Леонтьева)",
+            "<a href=\"https://t.me/riichi_one_outs\">One outs Riichi</a> (блог Александра Гончаренко)",
+            "<a href=\"https://t.me/guri_chan_no_majyan\">Маджонг Гури чан</a> (блог Григория Вовненко)",
+            "<a href=\"https://t.me/Under3Riichi\">🀄️Под тремя риичи🀄️</a> (блог Ильи Егорова)"
           ]
         }
       ]
     },
     {
-      "id": "fun",
-      "title": "Поразвлекаться",
-      "links": [
-        "<a href=\"https://docs.google.com/spreadsheets/d/1ibWdVnyVP0PXda7jC5JUpm7m3AQnlzcvwqMpn2PiykA\">Список фильмов, аниме и манги</a>",
-        "<a href=\"https://docs.google.com/spreadsheets/d/1J5Ocskeric_KIQd33yMI-mf-Gv2X5YuGSQ7WxUjmuEo\">Список аниме с упоминаниями маджонга</a>",
-        "<a href=\"https://t.me/densetsunakatala\">Аудиопасты про легендарного каталу</a>",
-        "<a href=\"https://t.me/riichimahjongset\">Канал про наборы</a>",
-        "<a href=\"https://t.me/mahjong_fucking_casino\">Записки про походы в дзянсо</a>",
-        "<a href=\"https://t.me/temakichi\">Творчество Temakichi</a>",
-        "<a href=\"https://t.me/newmleaguecommunity\">Обсуждение М-лиги</a>"
+      "id": "other",
+      "title": "Другое (развлекалово, стикерпаки)",
+      "sections": [
+        {
+          "id": "fun",
+          "title": "Поразвлекаться",
+          "links": [
+            "<a href=\"https://docs.google.com/spreadsheets/d/1ibWdVnyVP0PXda7jC5JUpm7m3AQnlzcvwqMpn2PiykA\">Список фильмов, аниме и манги</a>",
+            "<a href=\"https://docs.google.com/spreadsheets/d/1J5Ocskeric_KIQd33yMI-mf-Gv2X5YuGSQ7WxUjmuEo\">Список аниме с упоминаниями маджонга</a>",
+            "<a href=\"https://t.me/densetsunakatala\">Аудиопасты про легендарного каталу</a>",
+            "<a href=\"https://t.me/riichimahjongset\">Канал про наборы</a>",
+            "<a href=\"https://t.me/mahjong_fucking_casino\">Записки про походы в дзянсо</a>",
+            "<a href=\"https://t.me/temakichi\">Творчество Temakichi</a>",
+            "<a href=\"https://t.me/newmleaguecommunity\">Обсуждение М-лиги</a>",
+            "<a href=\"https://files.riichi.moe/mjg/\">Файловое хранилище с контентом по маджонгу</a> (Арты, книги, игры, фильмы, итд)"
+          ]
+        },
+        {
+          "id": "stickers",
+          "title": "Стикерпаки",
+          "links": [
+            "https://t.me/addstickers/Riichi — основной пак",
+            "",
+            "Mahjong Soul:",
+            "https://t.me/addstickers/MSFemale",
+            "https://t.me/addstickers/MSFemale2",
+            "https://t.me/addstickers/MSFemale3",
+            "https://t.me/addstickers/MSFemale4",
+            "https://t.me/addstickers/MSFemale5",
+            "https://t.me/addstickers/MSFemale6",
+            "https://t.me/addstickers/MSFemale7",
+            "https://t.me/addstickers/MSMale",
+            "https://t.me/addstickers/MSMale2",
+            "https://t.me/addstickers/MSMale3",
+            "https://t.me/addstickers/MSMale4",
+            "https://t.me/addstickers/mahjong_soul_saki",
+            "https://t.me/addstickers/MajsoulGeass",
+            "https://t.me/addstickers/MajsoulKaguya",
+            "https://t.me/addstickers/MajsoulFate",
+            "https://t.me/addstickers/MajsoulBlueArchive",
+            "https://t.me/addstickers/Majsoul_Idolmaster",
+            "https://t.me/addstickers/jantama",
+            "https://t.me/addstickers/MSAlt",
+            "https://t.me/addstickers/MJS_Ichihime",
+            "",
+            "Akagi:",
+            "https://t.me/addstickers/Akagi",
+            "",
+            "М-Лига:",
+            "https://t.me/addstickers/M_League",
+            "https://t.me/addstickers/M_League_old",
+            "",
+            "NAGA:",
+            "https://t.me/addstickers/Advice_Naga"
+          ]
+        }
       ]
     }
   ]
