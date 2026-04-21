@@ -516,6 +516,11 @@ def generate_links_menu(data, path="", prefix="links_"):
 
   # Кнопка "Закрыть"
   navigation_row.append(InlineKeyboardButton("❌ Закрыть", callback_data=f"{prefix}close"))
+
+  # Кнопка "Сохранить" для конечных нод
+  if 'sections' not in current:
+    navigation_row.append(InlineKeyboardButton("Сохранить", callback_data=f"{prefix}save"))
+
   keyboard.append(navigation_row)
 
   return message, InlineKeyboardMarkup(keyboard)
@@ -527,6 +532,10 @@ def links_callback(update: Update, context: CallbackContext) -> None:
 
   if query.data == "links_close":
     query.message.delete()
+    return
+
+  if query.data == "links_save":
+    query.edit_message_reply_markup(reply_markup=None)
     return
 
   path = ""
