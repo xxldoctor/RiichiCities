@@ -618,10 +618,8 @@ def main() -> None:
   dispatcher.add_handler(CommandHandler("debug", debug))
   dispatcher.add_handler(CommandHandler("debug_all", debug_all))
   dispatcher.add_handler(CommandHandler("links", links))
-  dispatcher.add_handler(CommandHandler("linksn", linksn))
   dispatcher.add_handler(CommandHandler("hand", hand))
   dispatcher.add_handler(CallbackQueryHandler(links_callback, pattern="^links_"))
-  dispatcher.add_handler(CallbackQueryHandler(linksn_callback, pattern="^linksn_"))
 
   # Запуск бота
   updater.start_polling()
