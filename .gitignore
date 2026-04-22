@@ -2,3 +2,15 @@ city_users.json
 chats.json
 token.txt
 .env
+
+# Local Python environment
+.venv/
+venv/
+
+# Editor local settings
+.vscode/
+
+# Python cache/artifacts
+__pycache__/
+**/__pycache__/
+*.pyc
