@@ -1,5 +1,5 @@
 import logging
-from telegram import Update
+from telegram import BotCommand, Update
 from telegram.ext import CallbackContext, CommandHandler, Updater
 
 from config import ADMIN_USERNAME, ALLOWED_CHATS, DATA_FILE, LINKS_FILE, load_token
@@ -49,6 +49,18 @@ def main() -> None:
   register_links_handlers(dispatcher, LINKS_FILE)
   register_hand_handlers(dispatcher)
   register_days_handlers(dispatcher)
+
+  updater.bot.set_my_commands([
+    BotCommand("help", "Список команд"),
+    BotCommand("cities", "Список городов"),
+    # BotCommand("users_from_city", "Пользователи города"),
+    # BotCommand("my_city", "Указать свой город"),
+    # BotCommand("leave_city", "Покинуть текущий город"),
+    BotCommand("links", "Полезные ссылки"),
+    # BotCommand("hand", "Ссылка на изображение руки"),
+    BotCommand("this_week_poll", "Опрос по текущей неделе"),
+    BotCommand("next_week_poll", "Опрос по следующей неделе"),
+  ])
 
   updater.start_polling()
   updater.idle()
