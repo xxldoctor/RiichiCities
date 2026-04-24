@@ -1,7 +1,9 @@
-city_users.json
 chats.json
 token.txt
 .env
+cities/
+cities_*/
+!cities_FORMAT.md
 
 # Local Python environment
 .venv/

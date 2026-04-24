@@ -3,14 +3,12 @@ name = "repl_nix_RiichiCities"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.9"
-python-telegram-bot = "13.13"
-Flask = "^2.3.2"
-requests = "^2.31.0"
-
-[tool.poetry.dev-dependencies]
+python = ">=3.10,<3.14"
+python-telegram-bot = "^22.7"
+apscheduler = "^3.11.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

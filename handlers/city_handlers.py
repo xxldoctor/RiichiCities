@@ -1,294 +1,553 @@
-from telegram import ChatMember, Update
-from telegram.ext import CallbackContext, CommandHandler
+from html import escape
+from typing import Dict, List, Optional, Tuple
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, User
+from telegram.constants import ChatMemberStatus
+from telegram.error import TelegramError
+from telegram.ext import CallbackQueryHandler, CommandHandler, ContextTypes
+
+from services.city_catalog_service import CityCatalog, CityInfo, CityPlayer, paginate_items, total_pages
 
 
-def register_city_handlers(dispatcher, city_repo, check_chat_id, admin_username):
-  def is_admin(update: Update) -> bool:
-    user = update.effective_user
+CITY_PAGE_SIZE = 12
+PLAYER_PAGE_SIZE = 10
+
+
+def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, check_chat_id, admin_username):
+  def build_display_name(user: Optional[User], profile: Optional[Dict[str, Optional[str]]], user_id: Optional[int]) -> str:
+    if user is not None:
+      if user.full_name:
+        return user.full_name
+      if user.username:
+        return f"@{user.username}"
+
+    if profile and profile.get("display_name"):
+      return profile["display_name"]
+    if profile and profile.get("username"):
+      return f"@{profile['username']}"
+    if user_id is not None:
+      return f"ID:{user_id}"
+    return "Неизвестный игрок"
+
+  def build_profile_url(player: CityPlayer) -> Optional[str]:
+    if player.username:
+      return f"https://t.me/{player.username}"
+    if player.user_id is not None:
+      return f"tg://user?id={player.user_id}"
+    return None
+
+  async def is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    if update.effective_user is None or update.effective_chat is None:
+      return False
+
+    member = await context.bot.get_chat_member(update.effective_chat.id, update.effective_user.id)
     return (
-      update.effective_chat.get_member(user.id).status in [ChatMember.ADMINISTRATOR, ChatMember.CREATOR]
-      or user.username == admin_username
+      member.status in {ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER}
+      or update.effective_user.username == admin_username
     )
 
-  def parse_user_mentions(update: Update):
-    command_parts = update.message.text.strip().split(None, 1)
-    if len(command_parts) < 2:
+  def parse_user_tokens(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Tuple[Optional[Dict[str, str]], Optional[str]]:
+    message = update.effective_message
+    if message is None:
+      return None, "Не удалось прочитать сообщение."
+
+    if not context.args:
       return None, "Вы не указали пользователя."
 
-    mentions = update.message.entities or []
-    user_ids = {}
+    user_tokens: Dict[str, str] = {}
+    entities = message.entities or []
+    for entity in entities:
+      if entity.type == "mention":
+        username = message.text[entity.offset + 1 : entity.offset + entity.length].lower()
+        user_tokens[username] = username
+      elif entity.type == "text_mention" and entity.user is not None:
+        label = message.text[entity.offset : entity.offset + entity.length]
+        user_tokens[label] = f"ID:{entity.user.id}"
 
-    for mention in mentions:
-      if mention.type == "mention":
-        user_mention = update.message.text[mention.offset + 1 : mention.offset + mention.length].lower()
-        user_ids[user_mention] = user_mention
-      elif mention.type == "text_mention":
-        user_mention = update.message.text[mention.offset : mention.offset + mention.length]
-        user_ids[user_mention] = f"ID:{mention.user.id}"
-
-    if len(command_parts) == 2 and not any(m.type in ["mention", "text_mention"] for m in mentions):
-      if len(command_parts[1].split()) == 1:
-        user_mention = command_parts[1].strip().lower()
-        user_ids[user_mention] = user_mention
-      else:
+    if not user_tokens:
+      if len(context.args) != 1:
         return None, (
           "Вы неправильно используете команду.\n"
-          "Укажите один юзернейм или используйте текст с упоминаниями пользователей (можно нескольких).\n"
-          "Для пользователей без юзернеймов поддерживается упоминание по ссылке."
+          "Укажите один юзернейм или используйте текст с упоминаниями пользователей."
         )
+      token = context.args[0].strip().lstrip("@").lower()
+      user_tokens[token] = token
 
-    return user_ids, None
+    return user_tokens, None
 
-  @check_chat_id
-  def cities(update: Update, _: CallbackContext, meta_id) -> None:
-    users_cities = city_repo.get_chat_data(meta_id).keys()
-    if not users_cities:
-      update.message.reply_text("Нет данных о городах и пользователях.")
-      return
-
-    cities_list = "\n".join(sorted(users_cities))
-    update.message.reply_text(f"Список городов с пользователями в маджонговых чатах:\n{cities_list}")
-
-  @check_chat_id
-  def users_from_city(update: Update, context: CallbackContext, meta_id) -> None:
-    command_parts = update.message.text.strip().split(None, 1)
-    if len(command_parts) < 2:
-      update.message.reply_text("Вы не указали город для вывода списка пользователей.")
-      return
-
-    city = command_parts[1].strip()
-    chat_data = city_repo.get_chat_data(meta_id)
-    users_ids = chat_data.get(city, [])
-
-    if city == "Видное":
-      update.message.reply_text(
-        "Единственный пользователь из этого города - "
-        "@shimmerko - занимает всё доступное место в городе."
-      )
-      return
-
-    if not users_ids:
-      update.message.reply_text(f"В маджонговых чатах нет данных о городе {city} или в нем нет пользователей.")
-      return
-
-    mention_list = []
-    for user_id in users_ids:
-      try:
-        member = update.effective_chat.get_member(user_id)
-        user = member.user
-        name = f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
-        if user.username:
-          mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a> (@{user.username})")
-        else:
-          mention_list.append(f"<a href=\"tg://user?id={user.id}\">{name}</a>")
-      except Exception:
-        mention_list.append(f"<a href=\"tg://user?id={user_id}\">ID:{user_id}</a>")
-
-    users_list = "\n".join(mention_list)
-    context.bot.send_message(
-      chat_id=update.effective_message.chat_id,
-      text=f"Пользователи из города {city}:\n{users_list}",
-      parse_mode="HTML",
-      disable_notification=True,
+  async def try_refresh_profile(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    meta_id: str,
+    city_name: str,
+    user_id: int,
+  ) -> Dict[str, Optional[str]]:
+    cached_player = next(
+      (player for player in city_repo.get_city_players(meta_id, city_name) if player.user_id == user_id),
+      None,
     )
+    cached_profile = {
+      "display_name": cached_player.display_name if cached_player is not None else None,
+      "username": cached_player.username if cached_player is not None else None,
+    }
 
-  @check_chat_id
-  def city_by_user(update: Update, _: CallbackContext, meta_id) -> None:
-    user_ids, error = parse_user_mentions(update)
-    if error:
-      update.message.reply_text(error.replace("пользователя.", "пользователя для получения города."))
-      return
+    if update.effective_chat is None or update.effective_chat.type == "private":
+      return cached_profile
 
-    chat_data = city_repo.get_chat_data(meta_id)
-    for user_id in user_ids:
-      city = next(
-        (
-          city_name
-          for city_name, users in chat_data.items()
-          if user_ids[user_id]
-          in [
-            update.effective_message.chat.get_member(uid).user.username
-            if update.effective_message.chat.get_member(uid).user.username
-            else f"ID:{uid}"
-            for uid in users
-          ]
-        ),
-        None,
+    try:
+      member = await context.bot.get_chat_member(update.effective_chat.id, user_id)
+    except TelegramError:
+      return cached_profile
+
+    user = member.user
+    city_repo.upsert_user_city(
+      meta_id,
+      city_name,
+      user.id,
+      display_name=user.full_name,
+      username=user.username,
+    )
+    return {
+      "display_name": user.full_name,
+      "username": user.username,
+    }
+
+  async def resolve_city_players(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    meta_id: str,
+    city_name: str,
+    city_info: Optional[CityInfo],
+  ) -> List[CityPlayer]:
+    players_by_key: Dict[str, CityPlayer] = {}
+
+    if city_info is not None:
+      for player in city_info.players:
+        key = f"id:{player.user_id}" if player.user_id is not None else f"user:{player.username}"
+        players_by_key[key] = player
+
+    for player in city_repo.get_city_players(meta_id, city_name):
+      if player.user_id is None:
+        continue
+      user_id = player.user_id
+      profile = await try_refresh_profile(update, context, meta_id, city_name, user_id)
+      dynamic_player = CityPlayer(
+        user_id=user_id,
+        display_name=build_display_name(None, profile, user_id),
+        username=profile.get("username"),
       )
-      if city:
-        update.message.reply_text(f"Город, привязанный к пользователю {user_id}: {city}")
+      players_by_key[f"id:{user_id}"] = dynamic_player
+
+    return sorted(players_by_key.values(), key=lambda player: (player.display_name or "", player.username or ""))
+
+  def city_counts(meta_id: str, city_name: str, city_info: Optional[CityInfo]) -> Tuple[int, int, int]:
+    player_keys = {
+      f"id:{player.user_id}" if player.user_id is not None else f"user:{player.username}"
+      for player in city_repo.get_city_players(meta_id, city_name)
+    }
+    if city_info is not None:
+      for player in city_info.players:
+        key = f"id:{player.user_id}" if player.user_id is not None else f"user:{player.username}"
+        player_keys.add(key)
+
+    players_count = len(player_keys)
+    clubs_count = len([club for club in city_info.clubs if club.visible]) if city_info is not None else 0
+    ratings_count = len([rating for rating in city_info.ratings if rating.visible]) if city_info is not None else 0
+    return players_count, clubs_count, ratings_count
+
+  def build_city_list_markup(meta_id: str, page: int) -> Tuple[str, InlineKeyboardMarkup]:
+    catalog = city_catalog.load(meta_id)
+    city_names = sorted(set(city_repo.get_city_names(meta_id)) | set(catalog.keys()))
+    pages = total_pages(city_names, CITY_PAGE_SIZE)
+    page = max(0, min(page, pages - 1))
+    page_city_names = paginate_items(city_names, page, CITY_PAGE_SIZE)
+
+    keyboard = []
+    for city_name in page_city_names:
+      users_count = len(city_repo.get_city_players(meta_id, city_name))
+      suffix = f" ({users_count})" if users_count else ""
+      keyboard.append([InlineKeyboardButton(f"{city_name}{suffix}", callback_data=f"city:view:{page}:{city_name}")])
+
+    navigation_row = []
+    if page > 0:
+      navigation_row.append(InlineKeyboardButton("⬅️", callback_data=f"cities:page:{page - 1}"))
+    navigation_row.append(InlineKeyboardButton(f"{page + 1}/{pages}", callback_data="cities:noop"))
+    if page + 1 < pages:
+      navigation_row.append(InlineKeyboardButton("➡️", callback_data=f"cities:page:{page + 1}"))
+    keyboard.append(navigation_row)
+    keyboard.append([InlineKeyboardButton("❌ Закрыть", callback_data="cities:close")])
+
+    title = "<b>Города</b>\nВыберите город, чтобы открыть игроков, клубы и рейтинги."
+    return title, InlineKeyboardMarkup(keyboard)
+
+  def build_city_menu(meta_id: str, city_name: str, page: int = 0) -> Tuple[str, InlineKeyboardMarkup]:
+    city_info = city_catalog.get_city(meta_id, city_name)
+    players_count, clubs_count, ratings_count = city_counts(meta_id, city_name, city_info)
+
+    lines = [f"<b>{escape(city_name)}</b>"]
+    lines.append(f"Игроков: {players_count}")
+    lines.append(f"Клубов: {clubs_count}")
+    lines.append(f"Рейтингов: {ratings_count}")
+    text = "\n".join(lines)
+
+    keyboard = []
+    keyboard.append([InlineKeyboardButton("Игроки", callback_data=f"city:players:0:{page}:{city_name}")])
+    keyboard.append([InlineKeyboardButton("Клубы", callback_data=f"city:clubs:{page}:{city_name}")])
+    keyboard.append([InlineKeyboardButton("Рейтинги", callback_data=f"city:ratings:{page}:{city_name}")])
+    keyboard.append([
+      InlineKeyboardButton("⬅️ Назад", callback_data=f"cities:page:{page}"),
+      InlineKeyboardButton("❌ Закрыть", callback_data="cities:close"),
+    ])
+    return text, InlineKeyboardMarkup(keyboard)
+
+  def build_links_markup(items, back_callback: str) -> InlineKeyboardMarkup:
+    keyboard = []
+    for item in items:
+      keyboard.append([InlineKeyboardButton(item.title, url=item.url)])
+
+    keyboard.append([
+      InlineKeyboardButton("⬅️ Назад", callback_data=back_callback),
+      InlineKeyboardButton("❌ Закрыть", callback_data="cities:close"),
+    ])
+    return InlineKeyboardMarkup(keyboard)
+
+  async def build_players_view(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    meta_id: str,
+    city_name: str,
+    city_page: int,
+    player_page: int,
+  ) -> Tuple[str, InlineKeyboardMarkup]:
+    city_info = city_catalog.get_city(meta_id, city_name)
+    if city_info is not None and city_info.users_text:
+      text = f"<b>{escape(city_name)}</b>\n{escape(city_info.users_text)}"
+      keyboard = InlineKeyboardMarkup([
+        [
+          InlineKeyboardButton("⬅️ Назад", callback_data=f"city:view:{city_page}:{city_name}"),
+          InlineKeyboardButton("❌ Закрыть", callback_data="cities:close"),
+        ]
+      ])
+      return text, keyboard
+
+    players = await resolve_city_players(update, context, meta_id, city_name, city_info)
+    if not players:
+      text = f"<b>{escape(city_name)}</b>\nНет данных об игроках."
+      keyboard = InlineKeyboardMarkup([
+        [
+          InlineKeyboardButton("⬅️ Назад", callback_data=f"city:view:{city_page}:{city_name}"),
+          InlineKeyboardButton("❌ Закрыть", callback_data="cities:close"),
+        ]
+      ])
+      return text, keyboard
+
+    pages = total_pages([player.display_name or "" for player in players], PLAYER_PAGE_SIZE)
+    player_page = max(0, min(player_page, pages - 1))
+    page_players = players[player_page * PLAYER_PAGE_SIZE : (player_page + 1) * PLAYER_PAGE_SIZE]
+
+    lines = [f"<b>{escape(city_name)}</b>", "Игроки:"]
+    keyboard = []
+    for player in page_players:
+      display_name = player.display_name or player.username or "Игрок"
+      if player.user_id is not None:
+        mention = f"<a href=\"tg://user?id={player.user_id}\">{escape(display_name)}</a>"
       else:
-        update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
+        mention = escape(display_name)
 
-  @check_chat_id
-  def my_city(update: Update, context: CallbackContext, meta_id) -> None:
-    user = update.effective_user
-    command_parts = update.message.text.strip().split(None, 1)
-    if len(command_parts) < 2:
-      update.message.reply_text("Вы не указали новый город для смены.")
-      return
+      if player.username:
+        lines.append(f"• {mention} (@{escape(player.username)})")
+      elif player.note:
+        lines.append(f"• {mention} — {escape(player.note)}")
+      else:
+        lines.append(f"• {mention}")
 
-    new_city = command_parts[1].strip()
-    if new_city.startswith("/"):
-      update.message.reply_text("Некорректное имя города. Город не может начинаться с '/'")
-      return
-    if new_city == "Видное":
-      update.message.reply_text("К сожалению в этом городе слишком тесно - вы не поместитесь =(")
-      return
+      profile_url = build_profile_url(player)
+      if profile_url:
+        keyboard.append([InlineKeyboardButton(display_name, url=profile_url)])
 
-    chat_data = city_repo.get_chat_data(meta_id)
-    if not chat_data:
-      chat_data = {new_city: [user.id]}
-    else:
-      old_city = next((city for city, users in chat_data.items() if user.id in users), None)
-      if old_city:
-        chat_data[old_city].remove(user.id)
-        if not chat_data[old_city]:
-          del chat_data[old_city]
+    navigation_row = []
+    if player_page > 0:
+      navigation_row.append(
+        InlineKeyboardButton("⬅️", callback_data=f"city:players:{player_page - 1}:{city_page}:{city_name}")
+      )
+    navigation_row.append(InlineKeyboardButton(f"{player_page + 1}/{pages}", callback_data="cities:noop"))
+    if player_page + 1 < pages:
+      navigation_row.append(
+        InlineKeyboardButton("➡️", callback_data=f"city:players:{player_page + 1}:{city_page}:{city_name}")
+      )
+    keyboard.append(navigation_row)
+    keyboard.append([
+      InlineKeyboardButton("⬅️ Назад", callback_data=f"city:view:{city_page}:{city_name}"),
+      InlineKeyboardButton("❌ Закрыть", callback_data="cities:close"),
+    ])
+    return "\n".join(lines), InlineKeyboardMarkup(keyboard)
 
-      if new_city not in chat_data:
-        chat_data[new_city] = []
-      chat_data[new_city].append(user.id)
+  def find_user_id_in_meta(meta_id: str, lookup_token: str) -> Optional[int]:
+    player = city_repo.find_player(meta_id, lookup_token)
+    if player is None:
+      return None
+    return player.user_id
 
-    city_repo.set_chat_data(meta_id, chat_data)
-    update.message.reply_text(f"Ваш город изменен на: {new_city}")
-
-    if new_city not in ["Москва", "Санкт-Петербург"]:
-      users_from_city(update, context)
-
-  @check_chat_id
-  def leave_city(update: Update, _: CallbackContext, meta_id) -> None:
-    user = update.effective_user
-    chat_data = city_repo.get_chat_data(meta_id)
-    city = next((city_name for city_name, users in chat_data.items() if user.id in users), None)
-    if not city:
-      update.message.reply_text("Вы не числитесь в каком-либо городе.")
-      return
-
-    city_repo.remove_user_from_city(meta_id, city, user.id)
-    update.message.reply_text(f"Вы удалены из города {city}.")
-
-  @check_chat_id
-  def rename_city(update: Update, _: CallbackContext, meta_id) -> None:
-    if not is_admin(update):
-      update.message.reply_text("Вы не являетесь администратором.")
-      return
-
-    if len(update.message.text.split()) < 2:
-      update.message.reply_text(
-        "Вы не указали старое и новое имя города для переименования.\n"
-        "Используйте запятую (,) в качестве разделителя."
+  async def send_or_edit(update: Update, text: str, reply_markup: InlineKeyboardMarkup, parse_mode: str = "HTML") -> None:
+    if update.callback_query is not None:
+      await update.callback_query.edit_message_text(
+        text,
+        reply_markup=reply_markup,
+        parse_mode=parse_mode,
+        disable_web_page_preview=True,
       )
       return
 
-    command_text = update.message.text.split(None, 1)[1].strip()
-    if "," not in command_text:
-      update.message.reply_text(
-        "Вы не указали старое и новое имя города для переименования.\n"
-        "Используйте запятую (,) в качестве разделителя."
+    if update.effective_message is not None:
+      await update.effective_message.reply_text(
+        text,
+        reply_markup=reply_markup,
+        parse_mode=parse_mode,
+        disable_web_page_preview=True,
       )
-      return
-
-    arg_cities = command_text.split(",")
-    if len(arg_cities) != 2:
-      update.message.reply_text("Вы должны указать ровно два города для переименования.")
-      return
-
-    old_city, new_city = arg_cities[0].strip(), arg_cities[1].strip()
-    if not old_city or not new_city:
-      update.message.reply_text("Вы не указали старое и/или новое имя города для переименования.")
-      return
-    if old_city.startswith("/") or new_city.startswith("/"):
-      update.message.reply_text("Некорректное имя города. Имена городов не могут начинаться с '/'")
-      return
-
-    chat_data = city_repo.get_chat_data(meta_id)
-    if old_city not in chat_data:
-      update.message.reply_text(f"Город '{old_city}' не найден в списке городов.")
-      return
-
-    chat_data[new_city] = chat_data.get(new_city, []) + chat_data[old_city]
-    del chat_data[old_city]
-    city_repo.set_chat_data(meta_id, chat_data)
-    update.message.reply_text(f"Город '{old_city}' переименован в '{new_city}'.")
 
   @check_chat_id
-  def remove_user(update: Update, _: CallbackContext, meta_id) -> None:
-    if not is_admin(update):
-      update.message.reply_text("Вы не являетесь администратором.")
+  async def cities(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    text, reply_markup = build_city_list_markup(meta_id, page=0)
+    await send_or_edit(update, text, reply_markup)
+
+  @check_chat_id
+  async def users_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_message is None:
       return
 
-    user_ids, error = parse_user_mentions(update)
+    if not context.args:
+      await update.effective_message.reply_text("Вы не указали город для вывода списка пользователей.")
+      return
+
+    city_name = " ".join(context.args).strip()
+    text, reply_markup = build_city_menu(meta_id, city_name)
+    await update.effective_message.reply_text(text, reply_markup=reply_markup, parse_mode="HTML")
+
+  @check_chat_id
+  async def city_by_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    user_tokens, error = parse_user_tokens(update, context)
     if error:
-      update.message.reply_text(error.replace("пользователя.", "пользователя для удаления."))
+      await update.effective_message.reply_text(error.replace("пользователя.", "пользователя для получения города."))
       return
 
-    chat_data = city_repo.get_chat_data(meta_id)
-    for user_id in user_ids:
-      city = next(
-        (
-          city_name
-          for city_name, users in chat_data.items()
-          if user_ids[user_id]
-          in [
-            update.effective_message.chat.get_member(uid).user.username
-            if update.effective_message.chat.get_member(uid).user.username
-            else f"ID:{uid}"
-            for uid in users
-          ]
-        ),
-        None,
-      )
-      if not city:
-        update.message.reply_text(f"Пользователь {user_id} не числится в каком-либо городе.")
+    for user_label, token in user_tokens.items():
+      user_id = find_user_id_in_meta(meta_id, token)
+      if user_id is None:
+        await update.effective_message.reply_text(f"Пользователь {user_label} не числится в каком-либо городе.")
         continue
 
-      if user_ids[user_id].startswith("ID:"):
-        remove_id = int(user_ids[user_id][3:])
+      city_name = city_repo.find_city_by_user_id(meta_id, user_id)
+      if city_name:
+        await update.effective_message.reply_text(f"Город, привязанный к пользователю {user_label}: {city_name}")
       else:
-        remove_id = None
-      for id_temp in chat_data[city]:
-        user = update.effective_message.chat.get_member(id_temp).user
-        if user.username == user_ids[user_id]:
-          remove_id = id_temp
-          break
-
-      if remove_id is not None:
-        city_repo.remove_user_from_city(meta_id, city, remove_id)
-        update.message.reply_text(f"Пользователь {user_id} удален из города {city}")
+        await update.effective_message.reply_text(f"Пользователь {user_label} не числится в каком-либо городе.")
 
   @check_chat_id
-  def remove_city(update: Update, _: CallbackContext, meta_id) -> None:
-    if not is_admin(update):
-      update.message.reply_text("Вы не являетесь администратором.")
+  async def my_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_user is None or update.effective_message is None:
       return
 
-    command_parts = update.message.text.strip().split(None, 1)
-    if len(command_parts) < 2:
-      update.message.reply_text("Вы не указали город для удаления.")
+    if not context.args:
+      await update.effective_message.reply_text("Вы не указали новый город для смены.")
       return
 
-    city = command_parts[1].strip()
-    chat_data = city_repo.get_chat_data(meta_id)
-    if city in chat_data:
-      del chat_data[city]
-      city_repo.set_chat_data(meta_id, chat_data)
-      update.message.reply_text(f"Город {city} удален из списка городов.")
+    new_city = " ".join(context.args).strip()
+    if new_city.startswith("/"):
+      await update.effective_message.reply_text("Некорректное имя города. Город не может начинаться с '/'.")
+      return
+
+    city_info = city_catalog.get_city(meta_id, new_city)
+    if city_info is not None and city_info.join_error_text:
+      await update.effective_message.reply_text(city_info.join_error_text)
+      return
+
+    user = update.effective_user
+    city_repo.upsert_user_city(
+      meta_id,
+      new_city,
+      user.id,
+      display_name=user.full_name,
+      username=user.username,
+    )
+    await update.effective_message.reply_text(f"Ваш город изменен на: {new_city}")
+
+    if city_info is None or city_info.auto_show_members:
+      text, reply_markup = build_city_menu(meta_id, new_city)
+      await update.effective_message.reply_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
   @check_chat_id
-  def debug(update: Update, _: CallbackContext, meta_id) -> None:
-    user = update.effective_user
-    if user.username != admin_username:
-      update.message.reply_text("Вы не являетесь администратором.")
+  async def leave_city(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_user is None or update.effective_message is None:
       return
-    update.message.reply_text(f"Структура city_users:\n{city_repo.get_chat_data(meta_id)}")
 
-  def debug_all(update: Update, _: CallbackContext) -> None:
-    user = update.effective_user
-    if user.username != admin_username:
-      update.message.reply_text("Вы не являетесь администратором.")
+    city_name = city_repo.find_city_by_user_id(meta_id, update.effective_user.id)
+    if not city_name:
+      await update.effective_message.reply_text("Вы не числитесь в каком-либо городе.")
       return
-    update.message.reply_text(f"Структура city_users:\n{city_repo.get_all()}")
+
+    city_repo.remove_user_from_city(meta_id, city_name, update.effective_user.id)
+    await update.effective_message.reply_text(f"Вы удалены из города {city_name}.")
+
+  @check_chat_id
+  async def rename_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_message is None:
+      return
+
+    if not await is_admin(update, context):
+      await update.effective_message.reply_text("Вы не являетесь администратором.")
+      return
+
+    command_text = " ".join(context.args).strip()
+    if "," not in command_text:
+      await update.effective_message.reply_text(
+        "Вы не указали старое и новое имя города для переименования.\n"
+        "Используйте запятую (,) в качестве разделителя."
+      )
+      return
+
+    old_city, new_city = [part.strip() for part in command_text.split(",", 1)]
+    if not old_city or not new_city:
+      await update.effective_message.reply_text("Вы не указали старое и/или новое имя города для переименования.")
+      return
+    if old_city.startswith("/") or new_city.startswith("/"):
+      await update.effective_message.reply_text("Некорректное имя города. Имена городов не могут начинаться с '/'.")
+      return
+
+    if not city_repo.rename_city(meta_id, old_city, new_city):
+      await update.effective_message.reply_text(f"Город '{old_city}' не найден в списке городов.")
+      return
+
+    await update.effective_message.reply_text(f"Город '{old_city}' переименован в '{new_city}'.")
+
+  @check_chat_id
+  async def remove_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_message is None:
+      return
+
+    if not await is_admin(update, context):
+      await update.effective_message.reply_text("Вы не являетесь администратором.")
+      return
+
+    user_tokens, error = parse_user_tokens(update, context)
+    if error:
+      await update.effective_message.reply_text(error.replace("пользователя.", "пользователя для удаления."))
+      return
+
+    for user_label, token in user_tokens.items():
+      user_id = find_user_id_in_meta(meta_id, token)
+      if user_id is None:
+        await update.effective_message.reply_text(f"Пользователь {user_label} не числится в каком-либо городе.")
+        continue
+
+      city_name = city_repo.find_city_by_user_id(meta_id, user_id)
+      if city_name is None:
+        await update.effective_message.reply_text(f"Пользователь {user_label} не числится в каком-либо городе.")
+        continue
+
+      city_repo.remove_user_from_city(meta_id, city_name, user_id)
+      await update.effective_message.reply_text(f"Пользователь {user_label} удален из города {city_name}.")
+
+  @check_chat_id
+  async def remove_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_message is None:
+      return
+
+    if not await is_admin(update, context):
+      await update.effective_message.reply_text("Вы не являетесь администратором.")
+      return
+
+    if not context.args:
+      await update.effective_message.reply_text("Вы не указали город для удаления.")
+      return
+
+    city_name = " ".join(context.args).strip()
+    if city_repo.remove_city(meta_id, city_name):
+      await update.effective_message.reply_text(f"Город {city_name} удален из списка городов.")
+      return
+
+    await update.effective_message.reply_text(f"Город {city_name} не найден.")
+
+  @check_chat_id
+  async def debug(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    if update.effective_user is None or update.effective_message is None:
+      return
+
+    if update.effective_user.username != admin_username:
+      await update.effective_message.reply_text("Вы не являетесь администратором.")
+      return
+
+    await update.effective_message.reply_text(f"Структура city files:\n{city_repo.get_chat_data(meta_id)}")
+
+  async def debug_all(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_user is None or update.effective_message is None:
+      return
+
+    if update.effective_user.username != admin_username:
+      await update.effective_message.reply_text("Вы не являетесь администратором.")
+      return
+
+    await update.effective_message.reply_text(f"Структура city files:\n{city_repo.get_all()}")
+
+  @check_chat_id
+  async def city_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+    query = update.callback_query
+    if query is None:
+      return
+
+    await query.answer()
+    data = query.data or ""
+
+    if data == "cities:close":
+      await query.message.delete()
+      return
+    if data == "cities:noop":
+      return
+    if data.startswith("cities:page:"):
+      page = int(data.split(":", 2)[2])
+      text, reply_markup = build_city_list_markup(meta_id, page)
+      await send_or_edit(update, text, reply_markup)
+      return
+
+    if data.startswith("city:view:"):
+      _, _, page, city_name = data.split(":", 3)
+      text, reply_markup = build_city_menu(meta_id, city_name, int(page))
+      await send_or_edit(update, text, reply_markup)
+      return
+
+    if data.startswith("city:clubs:"):
+      _, _, page, city_name = data.split(":", 3)
+      city_info = city_catalog.get_city(meta_id, city_name)
+      items = [club for club in city_info.clubs if club.visible] if city_info is not None else []
+      text = f"<b>{escape(city_name)}</b>\nКлубы города."
+      if not items:
+        text += "\nПока нет ссылок."
+      reply_markup = build_links_markup(items, f"city:view:{page}:{city_name}")
+      await send_or_edit(update, text, reply_markup)
+      return
+
+    if data.startswith("city:ratings:"):
+      _, _, page, city_name = data.split(":", 3)
+      city_info = city_catalog.get_city(meta_id, city_name)
+      items = [rating for rating in city_info.ratings if rating.visible] if city_info is not None else []
+      text = f"<b>{escape(city_name)}</b>\nРейтинги города."
+      if not items:
+        text += "\nПока нет ссылок."
+      reply_markup = build_links_markup(items, f"city:view:{page}:{city_name}")
+      await send_or_edit(update, text, reply_markup)
+      return
+
+    if data.startswith("city:players:"):
+      _, _, player_page, city_page, city_name = data.split(":", 4)
+      text, reply_markup = await build_players_view(
+        update,
+        context,
+        meta_id,
+        city_name,
+        int(city_page),
+        int(player_page),
+      )
+      await send_or_edit(update, text, reply_markup)
 
   dispatcher.add_handler(CommandHandler("cities", cities))
   dispatcher.add_handler(CommandHandler("users_from_city", users_from_city))
@@ -300,3 +559,4 @@ def register_city_handlers(dispatcher, city_repo, check_chat_id, admin_username)
   dispatcher.add_handler(CommandHandler("remove_city", remove_city))
   dispatcher.add_handler(CommandHandler("debug", debug))
   dispatcher.add_handler(CommandHandler("debug_all", debug_all))
+  dispatcher.add_handler(CallbackQueryHandler(city_callback, pattern=r"^(cities:|city:)"))
