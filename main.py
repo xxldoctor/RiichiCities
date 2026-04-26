@@ -65,7 +65,6 @@ async def chat_info_command(update: Update, _: ContextTypes.DEFAULT_TYPE) -> Non
 async def post_init(application) -> None:
   await application.bot.set_my_commands([
     BotCommand("help", "Список команд"),
-    BotCommand("chat_info", "Диагностика чата"),
     BotCommand("cities", "Список городов"),
     BotCommand("links", "Полезные ссылки"),
     BotCommand("this_week_poll", "Опрос по текущей неделе"),
