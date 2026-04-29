@@ -62,6 +62,7 @@
                 "<a href=\"https://t.me/+E1MCV0PkKTE3NGMy\">Тбилиси</a>",
                 "<a href=\"https://t.me/vataga_batumi\">Vataga (Батуми)</a>",
                 "<a href=\"https://t.me/oyunteamkgchat\">ОЮНтим (Бишкек)</a>",
+                "<a href=\"https://t.me/mahjongbaku\">Восточный ветер (Баку)</a>",
                 "<a href=\"https://t.me/+ox0KAGPJQUczNTgy\">Sofia Mahjong Club (София)</a>",
                 "<a href=\"https://t.me/tesuji_club\">Тесудзи (Москва)</a> (канал)",
                 "<a href=\"https://t.me/riichi_nvrsk\">МаджонГо (Новороссийск)</a> (канал)",
@@ -166,11 +167,8 @@
             "<a href=\"https://nodocchi.moe/tenhoulog\">Статистика по играм на TH</a>",
             "<a href=\"https://amae-koromo.sapk.ch\">Статистика по играм на MS</a>",
             "<a href=\"https://tempai.net/ru/eff\">Калькулятор эффективного сбора</a>",
-            "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Тренажёр эффективного сбора</a>",
             "<a href=\"https://kobalab.net/majiang/dapai.html\">Калькулятор Kobalab</a>",
             "<a href=\"https://pystyle.info/apps/mahjong-nanikiru-simulator\">Калькулятор Pystyle</a>",
-            "<a href=\"https://kobalab.net/majiang\">Риичи с ботами Kobalab</a>",
-            "<a href=\"https://sagisawa.0am.jp/akochandaaaaa\">Тренировка сбора руки Pystyle</a>",
             "<a href=\"https://mjai.ekyu.moe/ru.html\">Разбор игр нейросетью Mortal</a>",
             "<a href=\"https://naga.dmv.nico/naga_report/top\">Разбор игр нейросетью Naga</a>",
             "<a href=\"https://review.bigcoach.work/?lang=en\">Разбор игр нейросетью Big Coach</a>",
@@ -184,7 +182,7 @@
           "id": "trainers",
           "title": "Тренажёры",
           "links": [
-            "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer Bot</a>",
+            "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer</a> (ТГ бот)",
             "<a href=\"https://mj.fyisvia.com/point-calculation\">Тренажёр подсчёта очков</a>",
             "<a href=\"https://mj.fyisvia.com/hand-point-calculation\">Тренажёр подсчёта стоимости руки</a>",
             "<a href=\"https://mj.fyisvia.com/efficiency-train\">Тренажёр эффективного сброса</a>",
@@ -197,7 +195,9 @@
             "<a href=\"https://www.gamedesign.jp/flash/bamboo/bamboo.html\">Бамбуки</a> (flash)",
             "<a href=\"https://www.gamedesign.jp/games/bamboo\">Бамбуки</a> (HTML)",
             "<a href=\"https://hinakin.main.jp/script.htm\">Ещё разные тренажёры</a> (jap)",
-            "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Сайт с множеством тренажёров</a> (по дефолту открывается тренажёр эффективного сбора)"
+            "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Множеством тренажёров</a>",
+            "<a href=\"https://kobalab.net/majiang\">Риичи с ботами Kobalab</a>",
+            "<a href=\"https://sagisawa.0am.jp/akochandaaaaa\">Тренировка сбора руки Pystyle</a>"
           ]
         }
       ]
