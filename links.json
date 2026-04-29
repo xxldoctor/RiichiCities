@@ -185,7 +185,6 @@
           "title": "Тренажёры",
           "links": [
             "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer Bot</a>",
-            "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Тренажёр эффективного сбора</a>",
             "<a href=\"https://mj.fyisvia.com/point-calculation\">Тренажёр подсчёта очков</a>",
             "<a href=\"https://mj.fyisvia.com/hand-point-calculation\">Тренажёр подсчёта стоимости руки</a>",
             "<a href=\"https://mj.fyisvia.com/efficiency-train\">Тренажёр эффективного сброса</a>",
@@ -197,7 +196,8 @@
             "<a href=\"https://kovavka.github.io/irmin\">Тренажёр по игре вслепую</a>",
             "<a href=\"https://www.gamedesign.jp/flash/bamboo/bamboo.html\">Бамбуки</a> (flash)",
             "<a href=\"https://www.gamedesign.jp/games/bamboo\">Бамбуки</a> (HTML)",
-            "<a href=\"https://hinakin.main.jp/script.htm\">Ещё разные тренажёры</a> (jap)"
+            "<a href=\"https://hinakin.main.jp/script.htm\">Ещё разные тренажёры</a> (jap)",
+            "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Сайт с множеством тренажёров</a> (по дефолту открывается тренажёр эффективного сбора)"
           ]
         }
       ]
