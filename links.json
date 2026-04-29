@@ -185,14 +185,19 @@
           "title": "Тренажёры",
           "links": [
             "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer Bot</a>",
-            "<a href=\"https://t.me/TempaiBot\">Ракаги Шигеров</a> (Тренажёр поиска сложных ожиданий)",
             "<a href=\"https://euophrys.itch.io/mahjong-efficiency-trainer\">Тренажёр эффективного сбора</a>",
             "<a href=\"https://mj.fyisvia.com/point-calculation\">Тренажёр подсчёта очков</a>",
             "<a href=\"https://mj.fyisvia.com/hand-point-calculation\">Тренажёр подсчёта стоимости руки</a>",
             "<a href=\"https://mj.fyisvia.com/efficiency-train\">Тренажёр эффективного сброса</a>",
             "<a href=\"https://mj.fyisvia.com/pure-ones-tenpai\">Тренажёр поиска сложных ожиданий</a> (одноцветы)",
+            "<a href=\"https://mahjong-trainer.netlify.app\">Тренажёр поиска ожиданий</a>",
+            "<a href=\"https://chintore-4cc86.web.app/drill\">Тренажёр поиска ожиданий</a>",
+            "<a href=\"https://t.me/TempaiBot\">Телеграм бот - Ракаги Шигеров</a> (Тренажёр поиска сложных ожиданий)",
+            "<a href=\"https://kovavka.github.io/manzu-trainer\">Тренажёр поиска ожиданий</a> (одноцветы)",
             "<a href=\"https://kovavka.github.io/irmin\">Тренажёр по игре вслепую</a>",
-            "<a href=\"https://kovavka.github.io/manzu-trainer\">Тренажёр поиска ожиданий</a> (одноцветы)"
+            "<a href=\"https://www.gamedesign.jp/flash/bamboo/bamboo.html\">Бамбуки</a> (flash)",
+            "<a href=\"https://www.gamedesign.jp/games/bamboo\">Бамбуки</a> (HTML)",
+            "<a href=\"https://hinakin.main.jp/script.htm\">Ещё разные тренажёры</a> (jap)"
           ]
         }
       ]
