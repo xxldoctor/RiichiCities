@@ -28,7 +28,8 @@ async def help_command(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     "Список доступных команд (команды связанные с городами работают не во всех чатах):\n"
     "/help - Вывести список команд\n"
     "/cities - Открыть список городов\n"
-    "<code>/users_from_city город</code> - Открыть меню города\n"
+    "/clubs - Список клубов по городам\n"
+    "<code>/users_from_city город</code> - Открыть карточку города\n"
     "<code>/my_city город</code> - Установить/изменить свой город\n"
     "<code>/leave_city</code> - Удалить себя из текущего города\n"
     "/links - Полезные ссылки\n"
@@ -64,8 +65,10 @@ async def chat_info_command(update: Update, _: ContextTypes.DEFAULT_TYPE) -> Non
 
 async def post_init(application) -> None:
   await application.bot.set_my_commands([
+    BotCommand("start", "Список команд"),
     BotCommand("help", "Список команд"),
     BotCommand("cities", "Список городов"),
+    BotCommand("clubs", "Список клубов"),
     BotCommand("links", "Полезные ссылки"),
     BotCommand("this_week_poll", "Опрос по текущей неделе"),
     BotCommand("next_week_poll", "Опрос по следующей неделе"),
@@ -84,6 +87,7 @@ def main() -> None:
   check_chat_id = make_check_chat_id(city_repo, allowed_chats)
 
   application = ApplicationBuilder().token(token).post_init(post_init).job_queue(None).build()
+  application.add_handler(CommandHandler("start", help_command))
   application.add_handler(CommandHandler("help", help_command))
   application.add_handler(CommandHandler("chat_info", chat_info_command))
   register_city_handlers(application, city_repo, city_catalog, check_chat_id, ADMIN_USERNAME)

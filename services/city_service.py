@@ -1,5 +1,4 @@
 import json
-from dataclasses import asdict
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -61,13 +60,60 @@ class CityRepository:
   def _save_city(self, meta_id: str, city_info: CityInfo) -> None:
     target_dir = self.city_catalog.context_dir(meta_id)
     target_dir.mkdir(parents=True, exist_ok=True)
-    target_path = target_dir / f"{self.city_catalog.slugify(city_info.name)}.json"
-    payload = asdict(city_info)
+    previous_file_name = city_info.file_name
+    target_file_name = self.city_catalog.file_name_for_city(city_info.name)
+    target_path = target_dir / target_file_name
+    payload = {
+      "name": city_info.name,
+      "visible": city_info.visible,
+      "auto_show_members": city_info.auto_show_members,
+      "users_text": city_info.users_text,
+      "join_error_text": city_info.join_error_text,
+      "clubs": [
+        {
+          "title": club.title,
+          "url": club.url,
+          "visible": club.visible,
+        }
+        for club in city_info.clubs
+      ],
+      "ratings": [
+        {
+          "title": rating.title,
+          "url": rating.url,
+          "visible": rating.visible,
+        }
+        for rating in city_info.ratings
+      ],
+      "players": [
+        {
+          key: value
+          for key, value in {
+            "user_id": player.user_id,
+            "display_name": player.display_name,
+            "username": player.username,
+            "note": player.note,
+          }.items()
+          if value is not None
+        }
+        for player in city_info.players
+      ],
+    }
     with open(target_path, "w", encoding="utf-8") as file:
       json.dump(payload, file, ensure_ascii=False, indent=2)
+    if previous_file_name and previous_file_name != target_file_name:
+      previous_path = target_dir / previous_file_name
+      if previous_path.exists():
+        previous_path.unlink()
+    city_info.file_name = target_path.name
 
   def _delete_city_file(self, meta_id: str, city_name: str) -> None:
-    target_path = self.city_catalog.context_dir(meta_id) / f"{self.city_catalog.slugify(city_name)}.json"
+    city_info = self.get_city(meta_id, city_name)
+    if city_info is None:
+      return
+
+    file_name = city_info.file_name or self.city_catalog.file_name_for_city(city_info.name)
+    target_path = self.city_catalog.context_dir(meta_id) / file_name
     if target_path.exists():
       target_path.unlink()
 
@@ -129,13 +175,15 @@ class CityRepository:
     if old_city_info is None:
       return False
 
-    if old_city == new_city:
+    resolved_new_city = self.city_catalog.resolve_city_name(meta_id, new_city)
+    if self.city_catalog.city_key(old_city_info.name) == self.city_catalog.city_key(new_city):
       return True
 
-    new_city_info = self.get_city(meta_id, new_city)
+    new_city_info = self.get_city(meta_id, resolved_new_city or new_city)
     if new_city_info is None:
+      self._delete_city_file(meta_id, old_city_info.name)
       old_city_info.name = new_city
-      self._delete_city_file(meta_id, old_city)
+      old_city_info.file_name = self.city_catalog.file_name_for_city(new_city)
       self._save_city(meta_id, old_city_info)
       return True
 
@@ -151,7 +199,7 @@ class CityRepository:
     if old_city_info.auto_show_members is False:
       new_city_info.auto_show_members = False
 
-    self._delete_city_file(meta_id, old_city)
+    self._delete_city_file(meta_id, old_city_info.name)
     self._save_city(meta_id, new_city_info)
     return True
 

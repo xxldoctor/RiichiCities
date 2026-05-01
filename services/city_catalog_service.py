@@ -23,12 +23,14 @@ class CityPlayer:
 @dataclass
 class CityInfo:
   name: str
+  visible: bool = True
   auto_show_members: bool = True
   users_text: Optional[str] = None
   join_error_text: Optional[str] = None
   clubs: List[CityLink] = field(default_factory=list)
   ratings: List[CityLink] = field(default_factory=list)
   players: List[CityPlayer] = field(default_factory=list)
+  file_name: Optional[str] = field(default=None, repr=False, compare=False)
 
 
 class CityCatalog:
@@ -45,26 +47,13 @@ class CityCatalog:
         meta_ids.append(path.name[7:])
     return sorted(meta_ids)
 
-  def slugify(self, text: str) -> str:
-    translit_map = {
-      "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z",
-      "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r",
-      "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch",
-      "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya",
-    }
-    lowered = text.lower()
-    chars = []
-    for char in lowered:
-      if char in translit_map:
-        chars.append(translit_map[char])
-      elif char.isascii() and char.isalnum():
-        chars.append(char)
-      else:
-        chars.append("-")
+  def city_key(self, text: str) -> str:
+    return re.sub(r"\s+", " ", text.strip()).casefold()
 
-    slug = "".join(chars)
-    slug = re.sub(r"-+", "-", slug).strip("-")
-    return slug or "city"
+  def file_name_for_city(self, city_name: str) -> str:
+    forbidden_chars = '<>:"/\\|?*'
+    safe_name = "".join("_" if char in forbidden_chars else char for char in city_name.strip())
+    return f"{safe_name or 'city'}.json"
 
   def _load_city_file(self, path: Path) -> Optional[CityInfo]:
     with open(path, "r", encoding="utf-8-sig") as file:
@@ -76,6 +65,7 @@ class CityCatalog:
 
     return CityInfo(
       name=city_name,
+      visible=raw.get("visible", True),
       auto_show_members=raw.get("auto_show_members", True),
       users_text=raw.get("users_text"),
       join_error_text=raw.get("join_error_text"),
@@ -104,6 +94,7 @@ class CityCatalog:
         )
         for item in raw.get("players", [])
       ],
+      file_name=path.name,
     )
 
   def load(self, meta_id: str) -> Dict[str, CityInfo]:
@@ -120,7 +111,17 @@ class CityCatalog:
     return cities
 
   def get_city(self, meta_id: str, city_name: str) -> Optional[CityInfo]:
-    return self.load(meta_id).get(city_name)
+    resolved_name = self.resolve_city_name(meta_id, city_name)
+    if resolved_name is None:
+      return None
+    return self.load(meta_id).get(resolved_name)
+
+  def resolve_city_name(self, meta_id: str, city_name: str) -> Optional[str]:
+    target_key = self.city_key(city_name)
+    for existing_city_name in self.load(meta_id).keys():
+      if self.city_key(existing_city_name) == target_key:
+        return existing_city_name
+    return None
 
 
 def paginate_items(items: List[str], page: int, page_size: int) -> List[str]:
