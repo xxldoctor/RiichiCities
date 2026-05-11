@@ -202,6 +202,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     city_name: str,
     page: int,
     owner_id: int,
+    access_mode: str,
   ) -> Tuple[str, InlineKeyboardMarkup]:
     city_info = city_catalog.get_city(meta_id, city_name)
     if city_info is None:
@@ -216,7 +217,11 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     links = [item for item in city_info.clubs if item.visible] + [item for item in city_info.ratings if item.visible]
 
     lines = [f"<b>{escape(city_name)}</b>", "", "Игроки:"]
-    if city_info.users_text:
+    if access_mode == "limited_private":
+      lines.append(
+        "Список игроков доступен после того, как вы укажете свой город в одном из маджонговых чатов."
+      )
+    elif city_info.users_text:
       lines.append(escape(city_info.users_text))
     elif players:
       for player in players:
@@ -269,15 +274,15 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
         disable_web_page_preview=True,
       )
 
-  @check_chat_id
-  async def cities(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  @check_chat_id(read_only=True)
+  async def cities(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_user is None:
       return
     text, reply_markup = build_city_list_markup(meta_id, page=0, owner_id=update.effective_user.id)
     await send_or_edit(update, text, reply_markup)
 
-  @check_chat_id
-  async def clubs(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  @check_chat_id(read_only=True)
+  async def clubs(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None:
       return
 
@@ -298,8 +303,8 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
 
     await update.effective_message.reply_text("\n".join(lines), parse_mode="HTML", disable_web_page_preview=True)
 
-  @check_chat_id
-  async def users_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  @check_chat_id(read_only=True)
+  async def users_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None or update.effective_user is None:
       return
     if not context.args:
@@ -307,11 +312,19 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
       return
 
     city_name = " ".join(context.args).strip()
-    text, reply_markup = await build_city_view(update, context, meta_id, city_name, page=0, owner_id=update.effective_user.id)
+    text, reply_markup = await build_city_view(
+      update,
+      context,
+      meta_id,
+      city_name,
+      page=0,
+      owner_id=update.effective_user.id,
+      access_mode=access_mode,
+    )
     await update.effective_message.reply_text(text, reply_markup=reply_markup, parse_mode="HTML", disable_web_page_preview=True)
 
   @check_chat_id
-  async def city_by_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def city_by_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None:
       return
 
@@ -333,7 +346,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
         await update.effective_message.reply_text(f"Пользователь {user_label} не числится в каком-либо городе.")
 
   @check_chat_id
-  async def my_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def my_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_user is None or update.effective_message is None:
       return
     if not context.args:
@@ -356,11 +369,19 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
 
     city_info = city_catalog.get_city(meta_id, new_city)
     if city_info is None or city_info.auto_show_members:
-      text, reply_markup = await build_city_view(update, context, meta_id, new_city, page=0, owner_id=user.id)
+      text, reply_markup = await build_city_view(
+        update,
+        context,
+        meta_id,
+        new_city,
+        page=0,
+        owner_id=user.id,
+        access_mode="full",
+      )
       await update.effective_message.reply_text(text, reply_markup=reply_markup, parse_mode="HTML", disable_web_page_preview=True)
 
   @check_chat_id
-  async def leave_city(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def leave_city(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_user is None or update.effective_message is None:
       return
 
@@ -373,7 +394,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     await update.effective_message.reply_text(f"Вы удалены из города {city_name}.")
 
   @check_chat_id
-  async def rename_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def rename_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None:
       return
     if not await is_admin(update, context):
@@ -402,7 +423,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     await update.effective_message.reply_text(f"Город '{old_city}' переименован в '{new_city}'.")
 
   @check_chat_id
-  async def remove_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def remove_user(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None:
       return
     if not await is_admin(update, context):
@@ -429,7 +450,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
       await update.effective_message.reply_text(f"Пользователь {user_label} удален из города {city_name}.")
 
   @check_chat_id
-  async def remove_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def remove_city(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_message is None:
       return
     if not await is_admin(update, context):
@@ -447,7 +468,7 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     await update.effective_message.reply_text(f"Город {city_name} не найден.")
 
   @check_chat_id
-  async def debug(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  async def debug(update: Update, _: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     if update.effective_user is None or update.effective_message is None:
       return
     if update.effective_user.username != admin_username:
@@ -463,8 +484,8 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
       return
     await update.effective_message.reply_text(f"Структура city files:\n{city_repo.get_all()}")
 
-  @check_chat_id
-  async def city_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id) -> None:
+  @check_chat_id(read_only=True)
+  async def city_callback(update: Update, context: ContextTypes.DEFAULT_TYPE, meta_id, access_mode) -> None:
     query = update.callback_query
     if query is None:
       return
@@ -473,6 +494,12 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
     owner_id = parse_owner_id(data)
     if data.startswith("city:set:"):
       if update.effective_user is None:
+        return
+      if access_mode == "limited_private":
+        await query.answer(
+          "Указать свой город нужно в одном из маджонговых чатов, после этого полный список будет доступен и в личке.",
+          show_alert=True,
+        )
         return
       _, _, page, callback_owner_id, city_name = data.split(":", 4)
       city_info = city_catalog.get_city(meta_id, city_name)
@@ -487,7 +514,15 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
         username=update.effective_user.username,
       )
       await query.answer("Город обновлён.")
-      text, reply_markup = await build_city_view(update, context, meta_id, city_name, int(page), int(callback_owner_id))
+      text, reply_markup = await build_city_view(
+        update,
+        context,
+        meta_id,
+        city_name,
+        int(page),
+        int(callback_owner_id),
+        access_mode,
+      )
       await send_or_edit(update, text, reply_markup)
       return
 
@@ -512,7 +547,15 @@ def register_city_handlers(dispatcher, city_repo, city_catalog: CityCatalog, che
       return
     if data.startswith("city:view:"):
       _, _, page, callback_owner_id, city_name = data.split(":", 4)
-      text, reply_markup = await build_city_view(update, context, meta_id, city_name, int(page), int(callback_owner_id))
+      text, reply_markup = await build_city_view(
+        update,
+        context,
+        meta_id,
+        city_name,
+        int(page),
+        int(callback_owner_id),
+        access_mode,
+      )
       await send_or_edit(update, text, reply_markup)
 
   dispatcher.add_handler(CommandHandler("cities", cities))

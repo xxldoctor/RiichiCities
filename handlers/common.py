@@ -16,7 +16,19 @@ def make_check_chat_id(city_repo, allowed_chats: Dict[str, str]) -> Callable:
 
     return sorted(meta_ids)[0]
 
-  def check_chat_id(func: Callable[..., Awaitable[None]]):
+  def resolve_public_meta_id() -> str | None:
+    if "mahjong" in allowed_chats.values():
+      return "mahjong"
+
+    unique_meta_ids = sorted(set(allowed_chats.values()))
+    return unique_meta_ids[0] if unique_meta_ids else None
+
+  def check_chat_id(func: Callable[..., Awaitable[None]] = None, *, read_only: bool = False):
+    if func is None:
+      def decorator(inner_func: Callable[..., Awaitable[None]]):
+        return check_chat_id(inner_func, read_only=read_only)
+      return decorator
+
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
       if update.effective_chat is None or update.effective_user is None or update.effective_message is None:
@@ -28,7 +40,12 @@ def make_check_chat_id(city_repo, allowed_chats: Dict[str, str]) -> Callable:
       if chat_id == str(user_id):
         meta_id = resolve_private_meta_id(user_id)
         if meta_id is not None:
-          return await func(update, context, meta_id=meta_id)
+          return await func(update, context, meta_id=meta_id, access_mode="full")
+
+        if read_only:
+          public_meta_id = resolve_public_meta_id()
+          if public_meta_id is not None:
+            return await func(update, context, meta_id=public_meta_id, access_mode="limited_private")
 
         await update.effective_message.reply_text(
           "Извините, но вы не числитесь в каком-либо городе. "
@@ -44,7 +61,7 @@ def make_check_chat_id(city_repo, allowed_chats: Dict[str, str]) -> Callable:
         )
         return
 
-      return await func(update, context, meta_id=allowed_chats[chat_id])
+      return await func(update, context, meta_id=allowed_chats[chat_id], access_mode="full")
 
     return wrapper
 
