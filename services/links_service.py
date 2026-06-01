@@ -73,7 +73,7 @@ def generate_links_menu(
 
   navigation_row.append(InlineKeyboardButton("❌ Закрыть", callback_data=f"{prefix}close"))
 
-  if show_controls:
+  if show_controls and not has_sections:
     navigation_row.append(InlineKeyboardButton("Сохранить", callback_data=f"{prefix}save"))
 
   keyboard.append(navigation_row)
