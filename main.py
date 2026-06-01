@@ -33,6 +33,7 @@ async def help_command(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     "<code>/my_city город</code> - Установить/изменить свой город\n"
     "<code>/leave_city</code> - Удалить себя из текущего города\n"
     "/links - Полезные ссылки\n"
+    "/online, /learn, /theory, /tools, /trainers, /social, /streams, /blogs, /other, /fun, /stickers - быстрый доступ к разделам ссылок\n"
     "/this_week_poll - Опрос по дням на эту неделю\n"
     "/next_week_poll - Опрос по дням на следующую неделю\n"
     "/hand - Сделать изображение руки. Формат:\n"
@@ -70,6 +71,17 @@ async def post_init(application) -> None:
     BotCommand("cities", "Список городов"),
     BotCommand("clubs", "Список клубов"),
     BotCommand("links", "Полезные ссылки"),
+    BotCommand("online", "Онлайн"),
+    BotCommand("learn", "Обучение"),
+    BotCommand("theory", "Теория"),
+    BotCommand("tools", "Инструменты"),
+    BotCommand("trainers", "Тренеры"),
+    BotCommand("social", "Сообщество"),
+    BotCommand("streams", "Стримы"),
+    BotCommand("blogs", "Блоги"),
+    BotCommand("other", "Другое"),
+    BotCommand("fun", "Развлечения"),
+    BotCommand("stickers", "Стикеры"),
     BotCommand("this_week_poll", "Опрос по текущей неделе"),
     BotCommand("next_week_poll", "Опрос по следующей неделе"),
   ])

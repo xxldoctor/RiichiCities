@@ -47,9 +47,6 @@ class CityCatalog:
         meta_ids.append(path.name[7:])
     return sorted(meta_ids)
 
-  def city_key(self, text: str) -> str:
-    return re.sub(r"\s+", " ", text.strip()).casefold()
-
   def file_name_for_city(self, city_name: str) -> str:
     forbidden_chars = '<>:"/\\|?*'
     safe_name = "".join("_" if char in forbidden_chars else char for char in city_name.strip())
@@ -111,17 +108,7 @@ class CityCatalog:
     return cities
 
   def get_city(self, meta_id: str, city_name: str) -> Optional[CityInfo]:
-    resolved_name = self.resolve_city_name(meta_id, city_name)
-    if resolved_name is None:
-      return None
-    return self.load(meta_id).get(resolved_name)
-
-  def resolve_city_name(self, meta_id: str, city_name: str) -> Optional[str]:
-    target_key = self.city_key(city_name)
-    for existing_city_name in self.load(meta_id).keys():
-      if self.city_key(existing_city_name) == target_key:
-        return existing_city_name
-    return None
+    return self.load(meta_id).get(city_name)
 
 
 def paginate_items(items: List[str], page: int, page_size: int) -> List[str]:

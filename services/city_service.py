@@ -175,11 +175,10 @@ class CityRepository:
     if old_city_info is None:
       return False
 
-    resolved_new_city = self.city_catalog.resolve_city_name(meta_id, new_city)
-    if self.city_catalog.city_key(old_city_info.name) == self.city_catalog.city_key(new_city):
+    if old_city == new_city:
       return True
 
-    new_city_info = self.get_city(meta_id, resolved_new_city or new_city)
+    new_city_info = self.get_city(meta_id, new_city)
     if new_city_info is None:
       self._delete_city_file(meta_id, old_city_info.name)
       old_city_info.name = new_city
