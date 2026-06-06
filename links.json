@@ -284,7 +284,7 @@
         },
         {
           "id": "stickers",
-          "title": "Стикерпаки",
+          "title": "Стикерпаки и эмодзи",
           "links": [
             "https://t.me/addstickers/Riichi — основной пак",
             "",
@@ -310,7 +310,7 @@
             "https://t.me/addstickers/MSAlt",
             "https://t.me/addstickers/MJS_Ichihime",
             "",
-            "Riichi City",
+            "Riichi City:",
             "https://t.me/addstickers/Riichi_City",
             "",
             "Akagi:",
@@ -322,7 +322,13 @@
             "https://t.me/addstickers/NihonPuroMajanMemei",
             "",
             "NAGA:",
-            "https://t.me/addstickers/Advice_Naga"
+            "https://t.me/addstickers/Advice_Naga",
+
+            "Эмодзи:",
+            "https://t.me/addemoji/RiichiTiles",
+            "https://t.me/addemoji/RiichiTilesProNeuron",
+            "https://t.me/addemoji/Riichi_4NinUchiMahjong",
+            "https://t.me/addemoji/RU_RiichiLogo (маджонг клубы)"
           ]
         }
       ]
