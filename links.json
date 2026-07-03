@@ -61,8 +61,8 @@
                 "<a href=\"https://t.me/ere1so\">Ere1 So (Ереван)</a>",
                 "<a href=\"https://t.me/+E1MCV0PkKTE3NGMy\">Цинцадзе (Тбилиси)</a>",
                 "<a href=\"https://t.me/YonHan_riichibatumi\">Ён Хан (Батуми)</a>",
-                "<a href=\"https://t.me/oyunteamkgchat\">ОЮНтим (Бишкек)</a>",
-                "<a href=\"https://t.me/mahjongbaku\">Восточный ветер (Баку)</a>",
+                "<a href=\"https://t.me/oyunteamkgchat\">Hatsu (Бишкек)</a>",
+                "<a href=\"https://t.me/+J3HiLvbInE8wZDAy\">Баку</a>",
                 "<a href=\"https://t.me/+ox0KAGPJQUczNTgy\">Sofia Mahjong Club (София)</a>",
                 "<a href=\"https://t.me/tesuji_club\">Тесудзи (Москва)</a> (канал)",
                 "<a href=\"https://t.me/riichi_nvrsk\">МаджонГо (Новороссийск)</a> (канал)",
@@ -184,6 +184,8 @@
           "title": "Тренажёры",
           "links": [
             "<a href=\"https://t.me/riichi_trainer_bot\">Riichi Trainer</a> (ТГ бот)",
+            "<a href=\"https://riichiscore.com\">Тренажёр подсчёта очков</a>",
+            "<a href=\"https://scoringtrainer.konbamwa.net/\">Тренажёр подсчёта стоимости руки</a>",
             "<a href=\"https://mj.fyisvia.com/point-calculation\">Тренажёр подсчёта очков</a>",
             "<a href=\"https://mj.fyisvia.com/hand-point-calculation\">Тренажёр подсчёта стоимости руки</a>",
             "<a href=\"https://mj.fyisvia.com/efficiency-train\">Тренажёр эффективного сброса</a>",
@@ -245,6 +247,7 @@
             "<a href=\"https://www.twitch.tv/hard1kk\">Филипп Троценко</a>",
             "<a href=\"https://www.twitch.tv/yourksenia\">Ксения Лысанюк</a>",
             "<a href=\"https://www.twitch.tv/animeiiiniks\">Александр Черкасов</a>",
+            "<a href=\"https://www.twitch.tv/airabranford\">Маргарита Егорова</a>"
             "<a href=\"https://www.twitch.tv/turbomouse\">Имя Неизвестно</a>"
           ]
         },
